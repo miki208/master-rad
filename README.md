@@ -10,5 +10,5 @@
 
 ### Литература
 
-1. Charles Bihis. *Mastering OAuth 2.0*, Packt Publishing Ltd (2015), ISBN 978-1-78439-540-7</br>
-2. Leonard Richardsonet al. *RESTful Web APIs*, O’Reilly Media, Inc (2013), ISBN 978-1-449-35806-8
+1. Charles Bihis. *Mastering OAuth 2.0*, Packt Publishing Ltd (2015)</br>
+2. Leonard Richardson et al. *RESTful Web APIs*, O’Reilly Media, Inc (2013)
