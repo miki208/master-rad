@@ -16,5 +16,6 @@ OAuth 2 је протокол за ауторизацију који омогу�
 2. Leonard Richardson et al. *RESTful Web APIs*, O’Reilly Media, Inc (2013)</br>
 3. Sam Newman, *Building Microservices: Designing Fine-Grained Systems*, O'Reilly Media, Inc (2015)
 4. David Griffiths, *Head First Android Development: A Brain-Friendly Guide*, O'Reilly Media, Inc (2017)
-5. *Lumen documentation https://lumen.laravel.com/docs/5.6*
-6. *Documentation for app developers https://developer.android.com/docs/*
+5. Scott Millett, Nick Tune. *Patterns, Principles, and Practices of Domain-Driven Design*, Wrox (2015)
+6. *Lumen documentation https://lumen.laravel.com/docs/5.6*
+7. *Documentation for app developers https://developer.android.com/docs/*
