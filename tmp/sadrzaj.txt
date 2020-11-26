@@ -1,0 +1,11 @@
+Sadrzaj
+	Uvod
+	Domenski orijentisano modelovanje
+	Mikroservisna arhitektura
+	RESTful API
+	Prakticni deo rada
+		Koriscene tehnologije
+			Razvojni okvir Lumen
+			Programski jezik Java i Android komplet za razvoj softvera
+		Aplikacija MyRunningBuddy
+	Zakljucak
