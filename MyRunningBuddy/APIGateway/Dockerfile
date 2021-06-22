@@ -11,7 +11,7 @@ RUN echo "Setting the project" && \
     service mysql start && \
     php ./bin/composer install && \
     php artisan migrate && \
-    php artisan passport:install
+    php artisan passport:install --force
 
 ENTRYPOINT service mysql start && \
     php -S 0.0.0.0:8000 -t ./public
