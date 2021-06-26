@@ -3,12 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Helpers\HttpHelper;
+use App\Helpers\ResponseHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Http\Client\HttpClientException;
 use Illuminate\Http\Response;
 use Validator;
+use Auth;
 
 class UserController extends Controller
 {
@@ -23,56 +24,40 @@ class UserController extends Controller
         ]);
 
         if($validator->fails())
-            return response()->json(['message' => 'Validation errors', 'errors' => $validator->errors()],
-                Response::HTTP_BAD_REQUEST, [], JSON_UNESCAPED_SLASHES);
+            return ResponseHelper::GenerateValidatorErrorMessage($validator->errors());
 
         // check whether a user with this email already exists
-        $numberOfExistingUsers = User::where('email', $input['email'])->count();
-
-        if($numberOfExistingUsers > 0)
-        {
-            return response()->json(['message' => 'User with this email address already exists'],
-                Response::HTTP_BAD_REQUEST, [], JSON_UNESCAPED_SLASHES);
-        }
+        if(User::where('email', $input['email'])->count() > 0)
+            return ResponseHelper::GenerateSimpleTextResponse('User with this email address already exists',Response::HTTP_BAD_REQUEST);
 
         // pass additional information about user to Runner Management Service
-        try {
-            $response = Http::retry(config('httpclient.retries'))
-                ->timeout(config('httpclient.timeout'))
-                ->post(config('services.RunnerManagementServiceUrl') . '/runner', $input);
-        } catch (HttpClientException $e)
-        {
-            return response()->json(['message' => 'Internal service is currently unavailable. Please try again later.'],
-                Response::HTTP_INTERNAL_SERVER_ERROR, [], JSON_UNESCAPED_SLASHES);
-        }
+        $response = HttpHelper::request('post', 'RunnerManagementService', '/runner', [], $input);
+        if($response == null)
+            return ResponseHelper::GenerateInternalServiceUnavailableErrorResponse();
 
         // check if this operation was successful, and if it isn't try to return a meaningful error
-        if($response->status() != Response::HTTP_CREATED)
-        {
-            $message = 'Internal service error';
-            $errors_array = [];
-
-            if($response->status() == Response::HTTP_BAD_REQUEST)
-            {
-                if(isset($response['message']))
-                    $message = $message . ': ' . $response['message'];
-
-                if(isset($response['errors']))
-                    $errors_array = $response['errors'];
-            }
-
-            $error_response = [$message];
-            if(count($errors_array) > 0)
-                array_push($error_response, $errors_array);
-
-            return response()->json($error_response, $response->status(), [], JSON_UNESCAPED_SLASHES);
-        }
+        if($response->status() != Response::HTTP_CREATED || !isset($response['runner']['id']))
+            return ResponseHelper::GenerateErrorResponseFromAnotherResponse($response, 'Internal service error');
 
         // if everything is ok, make a user
         $input['password'] = Hash::make($input['password']);
+        $input['id'] = $response['runner']['id'];
         $user = User::create($input);
 
         return response()->json(['user' => $user, 'reference' => "/user/$user->id", 'message' => 'User created successfully'],
             Response::HTTP_CREATED, [], JSON_UNESCAPED_SLASHES);
+    }
+
+    public function get_user(Request $request, $id)
+    {
+        if(User::where('id', $id)->count() != 1)
+            return ResponseHelper::GenerateSimpleTextResponse("User doesn't exist.", Response::HTTP_NOT_FOUND);
+
+        $headers = ['X-User' => Auth::user()->id];
+        $response = HttpHelper::request('get', 'RunnerManagementService', "/runner/$id", $headers, []);
+        if($response == null)
+            return ResponseHelper::GenerateInternalServiceUnavailableErrorResponse();
+
+        return $response;
     }
 }

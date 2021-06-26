@@ -18,7 +18,8 @@ RUN echo "Installing PHP..." && \
     apt-get -yqq install php7.4-cli php7.4-fpm php7.4-json php7.4-common php7.4-mysql php7.4-zip php7.4-gd php7.4-mbstring php7.4-curl php7.4-xml php7.4-bcmath
 
 RUN echo "Installing MySQL..." && \
-    apt-get -yqq install mysql-server
+    apt-get -yqq install mysql-server && \
+    usermod -d /var/lib/mysql mysql
 
 RUN echo "Installing Composer..." && \
     php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \

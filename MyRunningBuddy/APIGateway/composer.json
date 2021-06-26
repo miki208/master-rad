@@ -20,7 +20,11 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+        "files": [
+            "app/Helpers/HttpHelper.php",
+            "app/Helpers/ResponseHelper.php"
+        ]
     },
     "autoload-dev": {
         "classmap": [
