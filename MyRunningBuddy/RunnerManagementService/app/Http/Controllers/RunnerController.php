@@ -40,6 +40,6 @@ class RunnerController extends Controller
             return response()->json(['message' => "Runner doesn't exist"], Response::HTTP_NOT_FOUND, [], JSON_UNESCAPED_SLASHES);
         }
 
-        return $runner;
+        return response()->json($runner, Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
     }
 }
