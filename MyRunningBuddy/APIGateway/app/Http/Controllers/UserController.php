@@ -58,6 +58,61 @@ class UserController extends Controller
         if($response == null)
             return ResponseHelper::GenerateInternalServiceUnavailableErrorResponse();
 
+        // check if this operation was successful, and if it isn't try to return a meaningful error
+        if($response->status() != Response::HTTP_OK)
+            return ResponseHelper::GenerateErrorResponseFromAnotherResponse($response, 'Internal service error');
+
+        return response()->json($response->json(), Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
+    }
+
+    public function update_user(Request $request, $id)
+    {
+        if(User::where('id', $id)->count() != 1)
+            return ResponseHelper::GenerateSimpleTextResponse("User doesn't exist.", Response::HTTP_NOT_FOUND);
+
+        $headers = ['X-User' => Auth::user()->id];
+        $response = HttpHelper::request('patch', 'RunnerManagementService', "/runner/$id", $headers, $request->all());
+        if($response == null)
+            return ResponseHelper::GenerateInternalServiceUnavailableErrorResponse();
+
+        // check if this operation was successful, and if it isn't try to return a meaningful error
+        if($response->status() != Response::HTTP_OK)
+            return ResponseHelper::GenerateErrorResponseFromAnotherResponse($response, 'Internal service error');
+
+        return response()->json($response->json(), Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
+    }
+
+    public function get_linked_services(Request $request, $id)
+    {
+        if(User::where('id', $id)->count() != 1)
+            return ResponseHelper::GenerateSimpleTextResponse("User doesn't exist.", Response::HTTP_NOT_FOUND);
+
+        $headers = ['X-User' => Auth::user()->id];
+        $response = HttpHelper::request('get', 'RunnerManagementService', "/runner/$id/linked_services", $headers, []);
+        if($response == null)
+            return ResponseHelper::GenerateInternalServiceUnavailableErrorResponse();
+
+        // check if this operation was successful, and if it isn't try to return a meaningful error
+        if($response->status() != Response::HTTP_OK)
+            return ResponseHelper::GenerateErrorResponseFromAnotherResponse($response, 'Internal service error');
+
+        return response()->json($response->json(), Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
+    }
+
+    public function get_authorization_params(Request $request, $id)
+    {
+        if(User::where('id', $id)->count() != 1)
+            return ResponseHelper::GenerateSimpleTextResponse("User doesn't exist.", Response::HTTP_NOT_FOUND);
+
+        $headers = ['X-User' => Auth::user()->id];
+        $response = HttpHelper::request('get', 'RunnerManagementService', "/runner/$id/authorization_params", $headers, $request->all());
+        if($response == null)
+            return ResponseHelper::GenerateInternalServiceUnavailableErrorResponse();
+
+        // check if this operation was successful, and if it isn't try to return a meaningful error
+        if($response->status() != Response::HTTP_OK)
+            return ResponseHelper::GenerateErrorResponseFromAnotherResponse($response, 'Internal service error');
+
         return response()->json($response->json(), Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
     }
 }

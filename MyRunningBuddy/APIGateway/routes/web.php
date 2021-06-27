@@ -45,4 +45,7 @@ $router->get("/system_status", function() {
 // protected routes
 $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->get('/user/{id}', ['uses' => 'UserController@get_user']);
+    $router->patch('/user/{id}', ['uses' => 'UserController@update_user']);
+    $router->get('/user/{id}/linked_services', ['uses' => 'UserController@get_linked_services']);
+    $router->get('/user/{id}/authorization_params', ['uses' => 'UserController@get_authorization_params']);
 });

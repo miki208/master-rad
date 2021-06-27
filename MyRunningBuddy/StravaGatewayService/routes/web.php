@@ -17,8 +17,4 @@ $router->get('/status', function() {
     return response()->json(['status' => 'ok'], \Illuminate\Http\Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
 });
 
-$router->post("/runner", ['uses' => 'RunnerController@register']);
-$router->get("/runner/{id}", ['uses' => 'RunnerController@get_runner']);
-$router->patch('/runner/{id}', ['uses' => 'RunnerController@update_runner']);
-$router->get('/runner/{id}/linked_services', ['uses' => 'RunnerController@get_linked_services']);
-$router->get('/runner/{id}/authorization_params', ['uses' => 'RunnerController@get_authorization_params']);
+$router->get('/authorization_params', ['uses' => 'StravaController@get_authorization_params']);

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Runner extends Model
 {
     protected $fillable = [
-        'name', 'surname', 'aboutme', 'preferences'
+        'name', 'surname', 'aboutme', 'preferences', 'location'
     ];
 
     protected $hidden = [
