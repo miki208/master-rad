@@ -58,6 +58,6 @@ class UserController extends Controller
         if($response == null)
             return ResponseHelper::GenerateInternalServiceUnavailableErrorResponse();
 
-        return response()->json($response, Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
+        return response()->json($response->json(), Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
     }
 }
