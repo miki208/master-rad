@@ -13,8 +13,21 @@ class HttpHelper
 {
     public static function request($method, $service_name, $route, $headers, $params)
     {
-        $maxNumberOfRetries = config('httpclient.retries');
-        $timeoutInSeconds = config('httpclient.timeout');
+        $maxNumberOfRetries = Cache::get('httpclient.retries');
+        if($maxNumberOfRetries == null)
+        {
+            $maxNumberOfRetries = config('httpclient.retries');
+
+            Cache::put('httpclient.retries', $maxNumberOfRetries, Carbon::now()->addHours(1));
+        }
+
+        $timeoutInSeconds = Cache::get('httpclient.timeout');
+        if($timeoutInSeconds == null)
+        {
+            $timeoutInSeconds = config('httpclient.timeout');
+
+            Cache::put('httpclient.timeout', $timeoutInSeconds, Carbon::now()->addHours(1));
+        }
 
         $service_url = self::resolve_service($service_name);
 

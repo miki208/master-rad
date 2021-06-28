@@ -31,7 +31,7 @@ $router->patch('/runner/{id}', ['uses' => 'RunnerController@update_runner']);
 $router->get('/runner/{id}/linked_services', ['uses' => 'RunnerController@get_linked_services']);
 
 // get params needed to initiate authorization with an external service
-$router->get('/runner/{id}/authorization_params', ['uses' => 'RunnerController@get_authorization_params']);
+$router->get('/runner/{id}/external_service_authorization_params', ['uses' => 'RunnerController@get_external_service_authorization_params']);
 
 // callback for accepting authorization grant from external services
 $router->post('/external_service', ['uses' => 'ExternalServiceAuthorizationController@authorization_grant_received']);

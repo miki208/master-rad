@@ -69,11 +69,11 @@ class UserController extends Controller
         return $this->check_user_and_pass_to_runner_management_service($request, 'get', $id, "/runner/$id/linked_services");
     }
 
-    public function get_authorization_params(Request $request, $id)
+    public function get_external_service_authorization_params(Request $request, $id)
     {
         $id = $this->preprocess_userid_if_needed($id);
 
-        return $this->check_user_and_pass_to_runner_management_service($request, 'get', $id, "/runner/$id/authorization_params");
+        return $this->check_user_and_pass_to_runner_management_service($request, 'get', $id, "/runner/$id/external_service_authorization_params");
     }
 
     private function preprocess_userid_if_needed($id)

@@ -62,5 +62,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->get('/user/{id}/linked_services', ['uses' => 'UserController@get_linked_services']);
 
     // get params needed to initiate authorization with an external service
-    $router->get('/user/{id}/authorization_params', ['uses' => 'UserController@get_authorization_params']);
+    $router->get('/user/{id}/external_service_authorization_params', ['uses' => 'UserController@get_external_service_authorization_params']);
+
+    // TODO: add route for revoking the access to external account
 });

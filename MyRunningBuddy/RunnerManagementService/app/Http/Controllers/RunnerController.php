@@ -93,7 +93,7 @@ class RunnerController extends Controller
             // account is linked if access_token is populated
             $linked = ExternalAccount::where('runner_id', $id)
                     ->where('service_name', $service->service_name)
-                    ->where('access_token', '!=', '')->count() == 1;
+                    ->where('confirmation_id', ExternalAccount::CONFIRMATION_ID_AUTHORIZED)->count() == 1;
 
             array_push($result, ['service' => $service, 'linked' => $linked]);
         }
@@ -101,12 +101,12 @@ class RunnerController extends Controller
         return response()->json($result, Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
     }
 
-    public function get_authorization_params(Request $request, $id)
+    public function get_external_service_authorization_params(Request $request, $id)
     {
-        if(!$this->check_if_authorized($request, $id))
+        if (!$this->check_if_authorized($request, $id))
             return ResponseHelper::GenerateSimpleTextResponse('Unauthorized.', Response::HTTP_UNAUTHORIZED);
 
-        if(Runner::where('id', $id)->count() != 1)
+        if (Runner::where('id', $id)->count() != 1)
             return ResponseHelper::GenerateSimpleTextResponse("Runner doesn't exist", Response::HTTP_NOT_FOUND);
 
         // data validation
@@ -116,11 +116,11 @@ class RunnerController extends Controller
             'service_name' => 'required|string|max:64',
         ]);
 
-        if($validator->fails())
+        if ($validator->fails())
             return ResponseHelper::GenerateValidatorErrorMessage($validator->errors());
 
         // check if the service exists
-        if(ExternService::where('service_name', $input['service_name'])->count() != 1)
+        if (ExternService::where('service_name', $input['service_name'])->count() != 1)
             return ResponseHelper::GenerateSimpleTextResponse("Extern service doesn't exist", Response::HTTP_NOT_FOUND);
 
         // contact external service gateway for authorization params
@@ -133,30 +133,38 @@ class RunnerController extends Controller
             return ResponseHelper::GenerateErrorResponseFromAnotherResponse($response);
 
         $responseJson = $response->json();
-        if(isset($responseJson['authorization_url']))
-        {
-            $authorization_url = $responseJson['authorization_url'];
-
-            $externalAccount = ExternalAccount::where('service_name', $input['service_name'])->where('runner_id', $id)->first();
-
-            if($externalAccount == null)
-            {
-                $externalAccount = new ExternalAccount();
-
-                $externalAccount->service_name = $input['service_name'];
-                $externalAccount->runner_id = $id;
-            }
-
-            $externalAccount->confirmation_id = $externalAccount->runner_id * 10000000000 + rand(1000000000, 9999999999);
-
-            $externalAccount->save();
-
-            $authorization_url = $authorization_url . "/" . $externalAccount->confirmation_id;
-
-            return response()->json(['authorization_url' => $authorization_url], Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
-        }
-        else
+        if(!isset($responseJson['authorization_url']))
             return ResponseHelper::GenerateSimpleTextResponse('Authorization URL missing', Response::HTTP_INTERNAL_SERVER_ERROR);
+
+        // revoke all previously authorized external accounts for the runner (and the ones in the process of authorization)
+        $externalAccounts = ExternalAccount::where('runner_id', $id)->where('confirmation_id', '!=', ExternalAccount::CONFIRMATION_ID_REVOKED)->get();
+        foreach ($externalAccounts as $externalAccount)
+        {
+            $externalAccount->confirmation_id = ExternalAccount::CONFIRMATION_ID_REVOKED;
+            $externalAccount->save();
+        }
+
+        // populate a request for authorization of an external account
+        $authorization_url = $responseJson['authorization_url'];
+
+        $externalAccount = ExternalAccount::where('service_name', $input['service_name'])->where('runner_id', $id)->first();
+
+        if($externalAccount == null)
+        {
+            $externalAccount = new ExternalAccount();
+
+            $externalAccount->service_name = $input['service_name'];
+            $externalAccount->runner_id = $id;
+        }
+
+        // making sure there is no possibility that two users have the same confirmation id
+        $externalAccount->confirmation_id = $externalAccount->runner_id * 10000000000 + rand(1000000000, 9999999999);
+
+        $externalAccount->save();
+
+        $authorization_url = $authorization_url . "/" . $externalAccount->confirmation_id;
+
+        return response()->json(['authorization_url' => $authorization_url], Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
     }
 
     private function check_if_authorized(Request $request, $id)
