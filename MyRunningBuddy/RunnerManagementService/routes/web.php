@@ -32,3 +32,6 @@ $router->get('/runner/{id}/linked_services', ['uses' => 'RunnerController@get_li
 
 // get params needed to initiate authorization with an external service
 $router->get('/runner/{id}/authorization_params', ['uses' => 'RunnerController@get_authorization_params']);
+
+// callback for accepting authorization grant from external services
+$router->post('/external_service', ['uses' => 'ExternalServiceAuthorizationController@authorization_grant_received']);

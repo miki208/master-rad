@@ -147,7 +147,7 @@ class RunnerController extends Controller
                 $externalAccount->runner_id = $id;
             }
 
-            $externalAccount->confirmation_id = rand(1000000000, 9999999999);
+            $externalAccount->confirmation_id = $externalAccount->runner_id * 10000000000 + rand(1000000000, 9999999999);
 
             $externalAccount->save();
 

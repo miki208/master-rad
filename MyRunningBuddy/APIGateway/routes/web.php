@@ -46,6 +46,9 @@ $router->get("/system_status", function() {
     return response()->json($response, \Illuminate\Http\Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
 });
 
+// callback for accepting authorization grant from external services
+$router->get('/external_service/{service_name}/{confirmation_id}', ['uses' => 'ExternalServiceAuthorizationController@authorization_grant_received']);
+
 /* Protected routes */
 
 $router->group(['middleware' => 'auth'], function () use ($router) {

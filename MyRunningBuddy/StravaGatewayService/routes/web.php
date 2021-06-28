@@ -20,3 +20,6 @@ $router->get('/status', function() {
 
 // get params needed to initiate authorization with Strava external service
 $router->get('/authorization_params', ['uses' => 'StravaController@get_authorization_params']);
+
+// callback for accepting authorization grant from external services
+$router->post('/external_service', ['uses' => 'StravaController@authorization_grant_received']);
