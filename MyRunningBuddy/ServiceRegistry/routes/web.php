@@ -13,10 +13,17 @@
 |
 */
 
+// register a new service
 $router->post('/service', ['uses' => 'ServiceController@AddService']);
-$router->get('/service/{service_name}', ['uses' => 'ServiceController@GetService']);
-$router->get('/service', ['uses' => 'ServiceController@GetAllServices']);
-$router->delete('/service/{service_id}', ['uses' => 'ServiceController@DeleteService']);
-$router->patch('/service/{service_id}', ['uses' => 'ServiceController@UpdateService']);
 
-//TODO: add routes for health check
+// get specific service(s) by name
+$router->get('/service/{service_name}', ['uses' => 'ServiceController@GetService']);
+
+// get all registered services
+$router->get('/service', ['uses' => 'ServiceController@GetAllServices']);
+
+// delete specific service by service id
+$router->delete('/service/{service_id}', ['uses' => 'ServiceController@DeleteService']);
+
+// update specific service by service id
+$router->patch('/service/{service_id}', ['uses' => 'ServiceController@UpdateService']);

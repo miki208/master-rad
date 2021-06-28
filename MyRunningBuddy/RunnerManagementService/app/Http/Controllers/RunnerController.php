@@ -7,7 +7,6 @@ use App\Helpers\ResponseHelper;
 use App\Models\ExternalAccount;
 use App\Models\ExternService;
 use App\Models\Runner;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Validator;
@@ -20,8 +19,8 @@ class RunnerController extends Controller
 
         // data validation
         $validator = Validator::make($input, [
-            'name' => 'required|string|max:256',
-            'surname' => 'sometimes|string|max:256',
+            'name' => 'required|string|max:30',
+            'surname' => 'sometimes|string|max:30',
             'aboutme' => 'sometimes|string|max:256',
             'preferences' => 'sometimes|string|max:256',
             'location' => 'sometimes|string|max:64'
@@ -49,8 +48,7 @@ class RunnerController extends Controller
 
     public function update_runner(Request $request, $id)
     {
-        $authenticated_user = $request->header('X-User');
-        if($authenticated_user == null or $authenticated_user != $id)
+        if(!$this->check_if_authorized($request, $id))
             return ResponseHelper::GenerateSimpleTextResponse('Unauthorized.', Response::HTTP_UNAUTHORIZED);
 
         $runner = Runner::where('id', $id)->first();
@@ -81,22 +79,21 @@ class RunnerController extends Controller
 
     public function get_linked_services(Request $request, $id)
     {
-        $authenticated_user = $request->header('X-User');
-        if($authenticated_user == null or $authenticated_user != $id)
+        if(!$this->check_if_authorized($request, $id))
             return ResponseHelper::GenerateSimpleTextResponse('Unauthorized.', Response::HTTP_UNAUTHORIZED);
 
         if(Runner::where('id', $id)->count() != 1)
             return ResponseHelper::GenerateSimpleTextResponse("Runner doesn't exist", Response::HTTP_NOT_FOUND);
 
+        // check for every external service if the user has linked account
         $result = [];
         $externServices = ExternService::all();
         foreach($externServices as $service)
         {
-            $linked = false;
-            if(ExternalAccount::where('runner_id', $id)
+            // account is linked if access_token is populated
+            $linked = ExternalAccount::where('runner_id', $id)
                     ->where('service_name', $service->service_name)
-                    ->where('access_token', '!=', '')->count() == 1)
-                $linked = true;
+                    ->where('access_token', '!=', '')->count() == 1;
 
             array_push($result, ['service' => $service, 'linked' => $linked]);
         }
@@ -106,8 +103,7 @@ class RunnerController extends Controller
 
     public function get_authorization_params(Request $request, $id)
     {
-        $authenticated_user = $request->header('X-User');
-        if($authenticated_user == null or $authenticated_user != $id)
+        if(!$this->check_if_authorized($request, $id))
             return ResponseHelper::GenerateSimpleTextResponse('Unauthorized.', Response::HTTP_UNAUTHORIZED);
 
         if(Runner::where('id', $id)->count() != 1)
@@ -123,28 +119,30 @@ class RunnerController extends Controller
         if($validator->fails())
             return ResponseHelper::GenerateValidatorErrorMessage($validator->errors());
 
+        // check if the service exists
         if(ExternService::where('service_name', $input['service_name'])->count() != 1)
             return ResponseHelper::GenerateSimpleTextResponse("Extern service doesn't exist", Response::HTTP_NOT_FOUND);
 
+        // contact external service gateway for authorization params
         $response = HttpHelper::request('get', $input['service_name'], "/authorization_params", [], []);
         if($response == null)
             return ResponseHelper::GenerateInternalServiceUnavailableErrorResponse();
 
         // check if this operation was successful, and if it isn't try to return a meaningful error
         if($response->status() != Response::HTTP_OK)
-            return ResponseHelper::GenerateErrorResponseFromAnotherResponse($response, 'Internal service error');
+            return ResponseHelper::GenerateErrorResponseFromAnotherResponse($response);
 
         $responseJson = $response->json();
         if(isset($responseJson['authorization_url']))
         {
             $authorization_url = $responseJson['authorization_url'];
 
-            $externalAccount = ExternalAccount::where('service_name', $input['service_name'])
-                ->where('runner_id', $id)->first();
+            $externalAccount = ExternalAccount::where('service_name', $input['service_name'])->where('runner_id', $id)->first();
 
             if($externalAccount == null)
             {
                 $externalAccount = new ExternalAccount();
+
                 $externalAccount->service_name = $input['service_name'];
                 $externalAccount->runner_id = $id;
             }
@@ -159,5 +157,15 @@ class RunnerController extends Controller
         }
         else
             return ResponseHelper::GenerateSimpleTextResponse('Authorization URL missing', Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
+
+    private function check_if_authorized(Request $request, $id)
+    {
+        $authenticated_user = $request->header('X-User');
+
+        if($authenticated_user == null or $authenticated_user != $id)
+            return false;
+
+        return true;
     }
 }

@@ -45,74 +45,67 @@ class UserController extends Controller
         $user = User::create($input);
 
         return response()->json(['user' => $user, 'reference' => "/user/$user->id", 'message' => 'User created successfully'],
-            Response::HTTP_CREATED, [], JSON_UNESCAPED_SLASHES);
+            $response->getStatusCode(), [], JSON_UNESCAPED_SLASHES);
     }
 
     public function get_user(Request $request, $id)
     {
-        if(User::where('id', $id)->count() != 1)
-            return ResponseHelper::GenerateSimpleTextResponse("User doesn't exist.", Response::HTTP_NOT_FOUND);
+        $id = $this->preprocess_userid_if_needed($id);
 
-        $headers = ['X-User' => Auth::user()->id];
-        $response = HttpHelper::request('get', 'RunnerManagementService', "/runner/$id", $headers, []);
-        if($response == null)
-            return ResponseHelper::GenerateInternalServiceUnavailableErrorResponse();
-
-        // check if this operation was successful, and if it isn't try to return a meaningful error
-        if($response->status() != Response::HTTP_OK)
-            return ResponseHelper::GenerateErrorResponseFromAnotherResponse($response, 'Internal service error');
-
-        return response()->json($response->json(), Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
+        return $this->check_user_and_pass_to_runner_management_service($request, 'get', $id, "/runner/$id");
     }
 
     public function update_user(Request $request, $id)
     {
-        if(User::where('id', $id)->count() != 1)
-            return ResponseHelper::GenerateSimpleTextResponse("User doesn't exist.", Response::HTTP_NOT_FOUND);
+        $id = $this->preprocess_userid_if_needed($id);
 
-        $headers = ['X-User' => Auth::user()->id];
-        $response = HttpHelper::request('patch', 'RunnerManagementService', "/runner/$id", $headers, $request->all());
-        if($response == null)
-            return ResponseHelper::GenerateInternalServiceUnavailableErrorResponse();
-
-        // check if this operation was successful, and if it isn't try to return a meaningful error
-        if($response->status() != Response::HTTP_OK)
-            return ResponseHelper::GenerateErrorResponseFromAnotherResponse($response, 'Internal service error');
-
-        return response()->json($response->json(), Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
+        return $this->check_user_and_pass_to_runner_management_service($request, 'patch', $id, "/runner/$id");
     }
 
     public function get_linked_services(Request $request, $id)
     {
-        if(User::where('id', $id)->count() != 1)
-            return ResponseHelper::GenerateSimpleTextResponse("User doesn't exist.", Response::HTTP_NOT_FOUND);
+        $id = $this->preprocess_userid_if_needed($id);
 
-        $headers = ['X-User' => Auth::user()->id];
-        $response = HttpHelper::request('get', 'RunnerManagementService', "/runner/$id/linked_services", $headers, []);
-        if($response == null)
-            return ResponseHelper::GenerateInternalServiceUnavailableErrorResponse();
-
-        // check if this operation was successful, and if it isn't try to return a meaningful error
-        if($response->status() != Response::HTTP_OK)
-            return ResponseHelper::GenerateErrorResponseFromAnotherResponse($response, 'Internal service error');
-
-        return response()->json($response->json(), Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
+        return $this->check_user_and_pass_to_runner_management_service($request, 'get', $id, "/runner/$id/linked_services");
     }
 
     public function get_authorization_params(Request $request, $id)
     {
+        $id = $this->preprocess_userid_if_needed($id);
+
+        return $this->check_user_and_pass_to_runner_management_service($request, 'get', $id, "/runner/$id/authorization_params");
+    }
+
+    private function preprocess_userid_if_needed($id)
+    {
+        // a special case when the user want to initiate an operation by using 'me' instead of a real user id in the route
+        if($id == 'me')
+            return Auth::user()->id;
+
+        return $id;
+    }
+
+    private function check_user_and_pass_to_runner_management_service(Request $request, $method, $id, $route)
+    {
+        // first check if user exists
         if(User::where('id', $id)->count() != 1)
             return ResponseHelper::GenerateSimpleTextResponse("User doesn't exist.", Response::HTTP_NOT_FOUND);
 
+        /*
+         * Pass the request to runner management service.
+         * We're going to send both $id and authenticated user id since a user can initiate some operation on behalf of another user.
+         */
         $headers = ['X-User' => Auth::user()->id];
-        $response = HttpHelper::request('get', 'RunnerManagementService', "/runner/$id/authorization_params", $headers, $request->all());
+        $response = HttpHelper::request($method, 'RunnerManagementService', $route, $headers, $request->all());
+
+        // handle errors if there are any and return a meaningful error if possible
         if($response == null)
             return ResponseHelper::GenerateInternalServiceUnavailableErrorResponse();
 
-        // check if this operation was successful, and if it isn't try to return a meaningful error
         if($response->status() != Response::HTTP_OK)
             return ResponseHelper::GenerateErrorResponseFromAnotherResponse($response, 'Internal service error');
 
-        return response()->json($response->json(), Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
+        // everything is ok
+        return response()->json($response->json(), $response->getStatusCode(), [], JSON_UNESCAPED_SLASHES);
     }
 }

@@ -13,8 +13,10 @@
 |
 */
 
+// health check for StravaGatewayService
 $router->get('/status', function() {
     return response()->json(['status' => 'ok'], \Illuminate\Http\Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
 });
 
+// get params needed to initiate authorization with Strava external service
 $router->get('/authorization_params', ['uses' => 'StravaController@get_authorization_params']);

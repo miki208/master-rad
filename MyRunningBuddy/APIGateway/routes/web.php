@@ -13,20 +13,24 @@
 |
 */
 
-// unprotected routes
+/* Unprotected routes */
+
+// register a new user
 $router->post('/user', ['uses' => 'UserController@register']);
 
+// health check for APIGateway
 $router->get('/status', function() {
     return response()->json(['status' => 'ok'], \Illuminate\Http\Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
 });
 
+// get the status of the system as whole
 $router->get("/system_status", function() {
     $servicesResponse = \App\Helpers\HttpHelper::request('get', 'ServiceRegistry', '/service', [], []);
 
     if($servicesResponse == null)
         return \App\Helpers\ResponseHelper::GenerateInternalServiceUnavailableErrorResponse();
 
-    $services = json_decode((string) $servicesResponse->getBody(), true);
+    $services = $servicesResponse->json();
 
     $response = [];
     foreach($services as $service)
@@ -42,10 +46,18 @@ $router->get("/system_status", function() {
     return response()->json($response, \Illuminate\Http\Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
 });
 
-// protected routes
+/* Protected routes */
+
 $router->group(['middleware' => 'auth'], function () use ($router) {
+    // get a user profile info
     $router->get('/user/{id}', ['uses' => 'UserController@get_user']);
+
+    // update a user profile info
     $router->patch('/user/{id}', ['uses' => 'UserController@update_user']);
+
+    // get all available external services along with the info whether the user has linked them to their account
     $router->get('/user/{id}/linked_services', ['uses' => 'UserController@get_linked_services']);
+
+    // get params needed to initiate authorization with an external service
     $router->get('/user/{id}/authorization_params', ['uses' => 'UserController@get_authorization_params']);
 });

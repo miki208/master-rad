@@ -6,23 +6,20 @@ use Illuminate\Http\Response;
 
 class ResponseHelper
 {
-    public static function GenerateErrorResponseFromAnotherResponse($from_response, $base_error_msg)
+    public static function GenerateErrorResponseFromAnotherResponse($from_response, $base_error_msg = '')
     {
-        $errors_array = [];
-
-        if($from_response->status() == Response::HTTP_BAD_REQUEST)
-        {
-            if(isset($from_response['message']))
-                $base_error_msg = $base_error_msg . ': ' . $from_response['message'];
-
-            if(isset($from_response['errors']))
-                $errors_array = $from_response['errors'];
-        }
-
         $error_response['message'] = $base_error_msg;
 
-        if(count($errors_array) > 0)
-            $error_response['errors'] = $errors_array;
+        if(isset($from_response['message']))
+        {
+            if($error_response['message'] != '')
+                $error_response['message'] = $error_response['message'] . ': ' . $from_response['message'];
+            else
+                $error_response['message'] = $from_response['message'];
+        }
+
+        if(isset($from_response['errors']))
+            $error_response['errors'] = $from_response['errors'];
 
         return response()->json($error_response, $from_response->status(), [], JSON_UNESCAPED_SLASHES);
     }
