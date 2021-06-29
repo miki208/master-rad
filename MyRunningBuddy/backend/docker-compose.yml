@@ -1,0 +1,46 @@
+version: "3.7"
+services:
+    service-registry:
+        build: ./ServiceRegistry
+        image: service-registry
+        environment:
+            - WEB_SERVER_PORT=8000
+        ports:
+            - "8001:8000"
+        networks:
+            - my-running-buddy-network
+    api-gateway:
+        build: ./APIGateway
+        image: api-gateway
+        environment:
+            - WEB_SERVER_PORT=8000
+        ports:
+            - "8002:8000"
+        networks:
+            - my-running-buddy-network
+        depends_on:
+            - service-registry
+    runner-management-service:
+        build: ./RunnerManagementService
+        image: runner-management-service
+        environment:
+            - WEB_SERVER_PORT=8000
+        expose:
+            - "8000"
+        networks:
+            - my-running-buddy-network
+        depends_on:
+            - service-registry
+    strava-gateway-service:
+        build: ./StravaGatewayService
+        image: strava-gateway-service
+        environment:
+            - WEB_SERVER_PORT=8000
+        expose:
+            - "8000"
+        networks:
+            - my-running-buddy-network
+        depends_on:
+            - service-registry
+networks:
+    my-running-buddy-network:
