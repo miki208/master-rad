@@ -9,7 +9,7 @@ use Illuminate\Http\Response;
 
 class ExternalServiceAuthorizationController extends Controller
 {
-    public function authorization_grant_received(Request $request, $service_name, $confirmation_id)
+    public function authorization_grant_callback(Request $request, $service_name, $confirmation_id)
     {
         $input = $request->all();
 
@@ -20,7 +20,7 @@ class ExternalServiceAuthorizationController extends Controller
         $input['service_name'] = $service_name;
         $input['confirmation_id'] = $confirmation_id;
 
-        $response = HttpHelper::request('post', 'RunnerManagementService', '/external_service', [], $input);
+        $response = HttpHelper::request('post', 'RunnerManagementService', '/authorization_grant_callback', [], $input);
 
         // handle errors if there are any and return a meaningful error if possible
         if($response == null)

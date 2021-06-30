@@ -14,7 +14,7 @@ RUN echo "Setting the project" && \
     service mysql start && \
     php ./bin/composer install && \
     php artisan migrate && \
-    mysql -u root --password=nekasifra208 -e "USE RunnerManagementService; INSERT INTO ExternServices(service_name, human_friendly_name) VALUES('StravaGatewayService', 'Strava');" && \
+    mysql -u root --password=nekasifra208 -e "USE RunnerManagementService; INSERT INTO ExternalServices(service_name, human_friendly_name) VALUES('StravaGatewayService', 'Strava');" && \
     service mysql stop
 
 EXPOSE $WEB_SERVER_PORT

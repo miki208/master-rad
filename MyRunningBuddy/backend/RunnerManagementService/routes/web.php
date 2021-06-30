@@ -19,7 +19,7 @@ $router->get('/status', function() {
 });
 
 // register a new runner
-$router->post("/runner", ['uses' => 'RunnerController@register']);
+$router->post("/runners", ['uses' => 'RunnerController@register']);
 
 // get a runner profile info
 $router->get("/runner/{id}", ['uses' => 'RunnerController@get_runner']);
@@ -34,4 +34,6 @@ $router->get('/runner/{id}/linked_services', ['uses' => 'RunnerController@get_li
 $router->get('/runner/{id}/external_service_authorization_params', ['uses' => 'RunnerController@get_external_service_authorization_params']);
 
 // callback for accepting authorization grant from external services
-$router->post('/external_service', ['uses' => 'ExternalServiceAuthorizationController@authorization_grant_received']);
+$router->post('/authorization_grant_callback', ['uses' => 'ExternalServiceAuthorizationController@authorization_grant_callback']);
+
+$router->delete('/runner/{id}/external_service/{service_name}', ['uses' => 'RunnerController@revoke_authorization_to_external_service']);

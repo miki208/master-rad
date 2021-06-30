@@ -22,4 +22,13 @@ $router->get('/status', function() {
 $router->get('/authorization_params', ['uses' => 'StravaController@get_authorization_params']);
 
 // callback for accepting authorization grant from external services
-$router->post('/external_service', ['uses' => 'StravaController@authorization_grant_received']);
+$router->post('/authorization_grant_callback', ['uses' => 'StravaController@authorization_grant_callback']);
+
+// refresh the access token
+$router->patch('/access_token', ['uses' => 'StravaController@refresh_access_token']);
+
+// revoke the access token
+$router->delete('/access_token', ['uses' => 'StravaController@revoke_access_token']);
+
+// get authorized user's activities
+$router->patch('/activities', ['uses' => 'StravaController@get_activities']);

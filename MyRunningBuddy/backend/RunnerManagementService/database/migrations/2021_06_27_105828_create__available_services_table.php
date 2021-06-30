@@ -13,7 +13,7 @@ class CreateAvailableServicesTable extends Migration
      */
     public function up()
     {
-        Schema::create('ExternServices', function (Blueprint $table) {
+        Schema::create('ExternalServices', function (Blueprint $table) {
             $table->id();
             $table->string('service_name', 64);
             $table->string('human_friendly_name', 64);
@@ -27,6 +27,6 @@ class CreateAvailableServicesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('ExternServices');
+        Schema::dropIfExists('ExternalServices');
     }
 }

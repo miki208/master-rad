@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Runner extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'name', 'surname', 'aboutme', 'preferences', 'location'
     ];

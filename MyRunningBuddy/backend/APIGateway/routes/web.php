@@ -16,7 +16,7 @@
 /* Unprotected routes */
 
 // register a new user
-$router->post('/user', ['uses' => 'UserController@register']);
+$router->post('/users', ['uses' => 'UserController@register']);
 
 // health check for APIGateway
 $router->get('/status', function() {
@@ -47,7 +47,7 @@ $router->get("/system_status", function() {
 });
 
 // callback for accepting authorization grant from external services
-$router->get('/external_service/{service_name}/{confirmation_id}', ['uses' => 'ExternalServiceAuthorizationController@authorization_grant_received']);
+$router->get('/authorization_grant_callback/{service_name}/{confirmation_id}', ['uses' => 'ExternalServiceAuthorizationController@authorization_grant_callback']);
 
 /* Protected routes */
 
@@ -64,5 +64,8 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     // get params needed to initiate authorization with an external service
     $router->get('/user/{id}/external_service_authorization_params', ['uses' => 'UserController@get_external_service_authorization_params']);
 
-    // TODO: add route for revoking the access to external account
+    $router->delete('/user/{id}/external_service/{service_name}', ['uses' => 'UserController@revoke_authorization_to_external_service']);
+
+    // TODO: implementation of getting new activities
+    // TODO: s, last synced to runner
 });

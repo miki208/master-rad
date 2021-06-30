@@ -13,5 +13,9 @@
         <env name="APP_ENV" value="testing"/>
         <env name="CACHE_DRIVER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
+        <env name="AUTHORIZATION_URL" value="https://www.strava.com/oauth/authorize?&amp;response_type=code&amp;approval_prompt=force"/>
+        <env name="CLIENT_ID" value="208"/>
+        <env name="CLIENT_SECRET" value="208208208"/>
+        <env name="AUTHORIZATION_SCOPE" value="profile:read_all,activity:read_all"/>
     </php>
 </phpunit>

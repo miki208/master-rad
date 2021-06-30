@@ -28,10 +28,10 @@ class UserController extends Controller
 
         // check whether a user with this email already exists
         if(User::where('email', $input['email'])->count() > 0)
-            return ResponseHelper::GenerateSimpleTextResponse('User with this email address already exists',Response::HTTP_BAD_REQUEST);
+            return ResponseHelper::GenerateSimpleTextResponse('User with this email address already exists.',Response::HTTP_BAD_REQUEST);
 
         // pass additional information about user to Runner Management Service
-        $response = HttpHelper::request('post', 'RunnerManagementService', '/runner', [], $input);
+        $response = HttpHelper::request('post', 'RunnerManagementService', '/runners', [], $input);
         if($response == null)
             return ResponseHelper::GenerateInternalServiceUnavailableErrorResponse();
 
@@ -44,8 +44,14 @@ class UserController extends Controller
         $input['id'] = $response['runner']['id'];
         $user = User::create($input);
 
-        return response()->json(['user' => $user, 'reference' => "/user/$user->id", 'message' => 'User created successfully'],
-            $response->getStatusCode(), [], JSON_UNESCAPED_SLASHES);
+        return response()->json([
+            'user' => $user,
+            'message' => 'User created successfully.',
+            'actions' => [
+                'get' => "/user/me",
+                'patch' => "/user/me"
+            ]
+        ], $response->getStatusCode(), [], JSON_UNESCAPED_SLASHES);
     }
 
     public function get_user(Request $request, $id)
@@ -74,6 +80,13 @@ class UserController extends Controller
         $id = $this->preprocess_userid_if_needed($id);
 
         return $this->check_user_and_pass_to_runner_management_service($request, 'get', $id, "/runner/$id/external_service_authorization_params");
+    }
+
+    public function revoke_authorization_to_external_service(Request $request, $id, $service_name)
+    {
+        $id = $this->preprocess_userid_if_needed($id);
+
+        return $this->check_user_and_pass_to_runner_management_service($request, 'delete', $id, "/runner/$id/external_service/$service_name");
     }
 
     private function preprocess_userid_if_needed($id)

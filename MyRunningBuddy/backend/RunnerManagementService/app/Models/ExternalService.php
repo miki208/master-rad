@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ExternService extends Model
+class ExternalService extends Model
 {
-    protected $table = 'ExternServices';
+    use HasFactory;
+
+    public $timestamps = false;
+    protected $table = 'ExternalServices';
 
     protected $fillable = [
         'service_name', 'human_friendly_name'
