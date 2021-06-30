@@ -238,7 +238,7 @@ class RunnerController extends Controller
 
     private function refresh_access_token($refresh_token, $service_name)
     {
-        $response = HttpHelper::request('patch', $service_name, '/refresh_access_token', [], ['refresh_token' => $refresh_token]);
+        $response = HttpHelper::request('patch', $service_name, '/access_token', [], ['refresh_token' => $refresh_token]);
 
         if($response == null or $response->status() != Response::HTTP_OK)
             return null;
