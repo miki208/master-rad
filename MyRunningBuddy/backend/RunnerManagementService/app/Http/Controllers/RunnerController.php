@@ -227,10 +227,7 @@ class RunnerController extends Controller
 
     private function should_refresh_access_token($expires_at)
     {
-        $now_dt = new \DateTime();
-        $expires_at_dt = new \DateTime($expires_at);
-
-        if($expires_at_dt->getTimestamp() - $now_dt->getTimestamp() < 30 * 60)
+        if($expires_at - time() < 30 * 60)
             return true;
 
         return false;

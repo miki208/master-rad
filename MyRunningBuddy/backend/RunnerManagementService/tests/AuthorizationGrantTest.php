@@ -32,7 +32,7 @@ class AuthorizationGrantTest extends TestCase
             'http://strava-gateway-service:8000/authorization_grant_callback' => Http::response([
                 'access_token' => 'accesstoken',
                 'refresh_token' => 'refreshtoken',
-                'expires_at' => date('Y-m-d H:i:s', time() + 6 * 60 * 60),
+                'expires_at' => time() + 6 * 60 * 60,
                 'athlete' => [
                     'lastname' => 'LastName',
                     'city' => 'CityExample',

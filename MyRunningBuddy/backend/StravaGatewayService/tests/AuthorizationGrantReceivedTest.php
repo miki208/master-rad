@@ -12,23 +12,19 @@ class AuthorizationGrantReceivedTest extends TestCase
             'https://www.strava.com/api/v3/oauth/token' => Http::response([
                 'refresh_token' => 'refreshtoken',
                 'access_token' => 'accesstoken',
-                'expires_at' => 'expires_at'
+                'expires_at' => 'expires_at',
+                'athlete' => []
             ], 200, [])
         ]);
 
-        $this->json('POST', '/external_service', [
+        $this->json('POST', '/authorization_grant_callback', [
             'code' => 'grantcode'
         ])->seeJson([
             'refresh_token' => 'refreshtoken',
             'access_token' => 'accesstoken',
-            'expiration_datetime' => 'expires_at'
+            'expires_at' => 'expires_at'
         ]);
 
         $this->assertResponseOk();
-    }
-
-    public function testAuthorizationServerDown()
-    {
-
     }
 }

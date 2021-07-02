@@ -31,4 +31,4 @@ $router->patch('/access_token', ['uses' => 'StravaController@refresh_access_toke
 $router->delete('/access_token', ['uses' => 'StravaController@revoke_access_token']);
 
 // get authorized user's activities
-$router->patch('/activities', ['uses' => 'StravaController@get_activities']);
+$router->get('/activities', ['uses' => 'StravaController@get_activities']);

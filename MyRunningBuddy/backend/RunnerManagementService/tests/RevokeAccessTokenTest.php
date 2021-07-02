@@ -14,12 +14,12 @@ class RevokeAccessTokenTest extends TestCase
     public function testRevokeAccessTokenWithoutRefreshingOk()
     {
         // test setup
-        $expires_at = date('Y-m-d H:i:s', time() + 5 * 60 * 60);
+        $expires_at = time() + 5 * 60 * 60;
 
         $runner = Runner::factory()->create();
         ExternalService::factory()->create();
         ExternalAccount::factory()->create([
-            'confirmation_id' => \App\Models\ExternalAccount::CONFIRMATION_ID_AUTHORIZED,
+            'confirmation_id' => ExternalAccount::CONFIRMATION_ID_AUTHORIZED,
             'runner_id' => $runner->id,
             'access_token' => 'accesstoken',
             'refresh_token' => 'refreshtoken',
@@ -27,7 +27,7 @@ class RevokeAccessTokenTest extends TestCase
             'expires_at' => $expires_at
         ]);
 
-        $new_expires_at = date('Y-m-d H:i:s', time() + 6 * 60 * 60);
+        $new_expires_at = time() + 5 * 60 * 60;
         $this->setFakeResponses($new_expires_at);
 
         // test case run
@@ -52,15 +52,15 @@ class RevokeAccessTokenTest extends TestCase
         $runner = Runner::factory()->create();
         ExternalService::factory()->create();
         ExternalAccount::factory()->create([
-            'confirmation_id' => \App\Models\ExternalAccount::CONFIRMATION_ID_AUTHORIZED,
+            'confirmation_id' => ExternalAccount::CONFIRMATION_ID_AUTHORIZED,
             'runner_id' => $runner->id,
             'access_token' => 'accesstoken',
             'refresh_token' => 'refreshtoken',
             'scope' => 'somescope',
-            'expires_at' => date('Y-m-d H:i:s', time() + 10 * 60) // token expires in 10 minutes, enough to trigger refreshing mechanism
+            'expires_at' => time() + 10 * 60 // token expires in 10 minutes, enough to trigger refreshing mechanism
         ]);
 
-        $new_expires_at = date('Y-m-d H:i:s', time() + 6 * 60 * 60);
+        $new_expires_at = time() + 6 * 60 * 60;
         $this->setFakeResponses($new_expires_at);
 
         // test case run

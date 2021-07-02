@@ -20,7 +20,7 @@ class CreateExternalaccountsTable extends Migration
             $table->string('access_token', 256)->default('');
             $table->string('refresh_token', 256)->default('');
             $table->string('scope', 256)->default('');
-            $table->dateTime('expires_at')->nullable();
+            $table->bigInteger('expires_at')->nullable();
             $table->bigInteger('confirmation_id');
             $table->timestamps();
         });

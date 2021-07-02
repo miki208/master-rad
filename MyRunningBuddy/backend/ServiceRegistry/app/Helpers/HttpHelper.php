@@ -8,26 +8,14 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
 use Log;
 use Carbon\Carbon;
+use App\Helpers\CommonHelper;
 
 class HttpHelper
 {
     public static function request($method, $service_name, $route, $headers, $params)
     {
-        $maxNumberOfRetries = Cache::get('httpclient.retries');
-        if($maxNumberOfRetries == null)
-        {
-            $maxNumberOfRetries = config('httpclient.retries');
-
-            Cache::put('httpclient.retries', $maxNumberOfRetries, Carbon::now()->addHours(1));
-        }
-
-        $timeoutInSeconds = Cache::get('httpclient.timeout');
-        if($timeoutInSeconds == null)
-        {
-            $timeoutInSeconds = config('httpclient.timeout');
-
-            Cache::put('httpclient.timeout', $timeoutInSeconds, Carbon::now()->addHours(1));
-        }
+        $maxNumberOfRetries = CommonHelpers::get_param('httpclient.retries');
+        $timeoutInSeconds = CommonHelpers::get_param('httpclient.timeout');
 
         $service_url = self::resolve_service($service_name);
 
@@ -59,7 +47,7 @@ class HttpHelper
     private static function resolve_service($service_name)
     {
         if($service_name == 'ServiceRegistry')
-            return config("serviceregistry.ServiceRegistryUrl");
+            return CommonHelpers::get_params('serviceregistry.ServiceRegistryUrl');
 
         // check if we have cached this service location
         $cacheEntry = Cache::get("service.$service_name");
