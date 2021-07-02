@@ -65,7 +65,4 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->get('/user/{id}/external_service_authorization_params', ['uses' => 'UserController@get_external_service_authorization_params']);
 
     $router->delete('/user/{id}/external_service/{service_name}', ['uses' => 'UserController@revoke_authorization_to_external_service']);
-
-    // TODO: implementation of getting new activities
-    // TODO: s, last synced to runner
 });

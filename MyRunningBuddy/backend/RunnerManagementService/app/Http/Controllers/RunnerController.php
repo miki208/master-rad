@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\HttpHelper;
 use App\Helpers\ResponseHelper;
+use App\Helpers\ServiceSpecificHelper;
 use App\Models\ExternalAccount;
 use App\Models\ExternalService;
 use App\Models\Runner;
@@ -54,7 +55,7 @@ class RunnerController extends Controller
 
     public function update_runner(Request $request, $id)
     {
-        if(!$this->check_if_authorized($request, $id))
+        if(!ServiceSpecificHelper::check_if_authorized($request, $id))
             return ResponseHelper::GenerateSimpleTextResponse('Unauthorized.', Response::HTTP_UNAUTHORIZED);
 
         $runner = Runner::where('id', $id)->first();
@@ -85,7 +86,7 @@ class RunnerController extends Controller
 
     public function get_linked_services(Request $request, $id)
     {
-        if(!$this->check_if_authorized($request, $id))
+        if(!ServiceSpecificHelper::check_if_authorized($request, $id))
             return ResponseHelper::GenerateSimpleTextResponse('Unauthorized.', Response::HTTP_UNAUTHORIZED);
 
         if(Runner::where('id', $id)->count() != 1)
@@ -109,7 +110,7 @@ class RunnerController extends Controller
 
     public function get_external_service_authorization_params(Request $request, $id)
     {
-        if (!$this->check_if_authorized($request, $id))
+        if (!ServiceSpecificHelper::check_if_authorized($request, $id))
             return ResponseHelper::GenerateSimpleTextResponse('Unauthorized.', Response::HTTP_UNAUTHORIZED);
 
         if (Runner::where('id', $id)->count() != 1)
@@ -175,7 +176,7 @@ class RunnerController extends Controller
 
     public function revoke_authorization_to_external_service(Request $request, $id, $service_name)
     {
-        if (!$this->check_if_authorized($request, $id))
+        if (!ServiceSpecificHelper::check_if_authorized($request, $id))
             return ResponseHelper::GenerateSimpleTextResponse('Unauthorized.', Response::HTTP_UNAUTHORIZED);
 
         if (Runner::where('id', $id)->count() != 1)
@@ -192,9 +193,9 @@ class RunnerController extends Controller
         if($externalAccount == null)
             return ResponseHelper::GenerateSimpleTextResponse("Runner doesn't have a linked account for this external service.", Response::HTTP_BAD_REQUEST);
 
-        if($this->should_refresh_access_token($externalAccount->expires_at))
+        if(ServiceSpecificHelper::should_refresh_access_token($externalAccount->expires_at))
         {
-            $new_tokens = $this->refresh_access_token($externalAccount->refresh_token, $service_name);
+            $new_tokens = ServiceSpecificHelper::refresh_access_token($externalAccount->refresh_token, $service_name);
 
             if($new_tokens != null)
             {
@@ -213,39 +214,5 @@ class RunnerController extends Controller
         HttpHelper::request('delete', $service_name, '/access_token', [], ['access_token' => $access_token]);
 
         return ResponseHelper::GenerateSimpleTextResponse('Authorization for external service successfully revoked.', Response::HTTP_OK);
-    }
-
-    private function check_if_authorized(Request $request, $id)
-    {
-        $authenticated_user = $request->header('X-User');
-
-        if($authenticated_user == null or $authenticated_user != $id)
-            return false;
-
-        return true;
-    }
-
-    private function should_refresh_access_token($expires_at)
-    {
-        if($expires_at - time() < 30 * 60)
-            return true;
-
-        return false;
-    }
-
-    private function refresh_access_token($refresh_token, $service_name)
-    {
-        $response = HttpHelper::request('patch', $service_name, '/access_token', [], ['refresh_token' => $refresh_token]);
-
-        if($response == null or $response->status() != Response::HTTP_OK)
-            return null;
-
-        $responseJson = $response->json();
-
-        return [
-            'access_token' => $responseJson['access_token'],
-            'refresh_token' => $responseJson['refresh_token'],
-            'expires_at' => $responseJson['expires_at']
-        ];
     }
 }

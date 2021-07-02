@@ -12,17 +12,23 @@ use App\Helpers\CommonHelper;
 
 class HttpHelper
 {
-    public static function request($method, $service_name, $route, $headers, $params)
+    private const SERVICE_WAS_DOWN = 1;
+
+    public static function request($method, $service_name, $route, $headers, $params, $fail_if_service_was_down = false)
     {
         $maxNumberOfRetries = CommonHelper::get_param('httpclient.retries');
         $timeoutInSeconds = CommonHelper::get_param('httpclient.timeout');
 
-        $service_url = self::resolve_service($service_name);
+        $service_url = self::resolve_service($service_name, $fail_if_service_was_down);
 
         if($service_url == null)
         {
             Log::error("Service resolving failed: non-existent service $service_name");
 
+            return null;
+        }
+        else if($fail_if_service_was_down and $service_url === self::SERVICE_WAS_DOWN)
+        {
             return null;
         }
 
@@ -44,7 +50,7 @@ class HttpHelper
             return null;
     }
 
-    private static function resolve_service($service_name)
+    private static function resolve_service($service_name, $resolve_to_null_if_was_unavailable = false)
     {
         if($service_name == 'ServiceRegistry')
             return CommonHelper::get_param('serviceregistry.ServiceRegistryUrl');
@@ -89,6 +95,9 @@ class HttpHelper
                 }
             }
         }
+
+        if($resolve_to_null_if_was_unavailable and $service['last_status'] == 'down')
+            return self::SERVICE_WAS_DOWN;
 
         return $service['location'] . ':' . $service['port'];
     }

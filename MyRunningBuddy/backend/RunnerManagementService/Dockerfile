@@ -15,8 +15,10 @@ RUN echo "Setting the project" && \
     php ./bin/composer install && \
     php artisan migrate && \
     mysql -u root --password=nekasifra208 -e "USE RunnerManagementService; INSERT INTO ExternalServices(service_name, human_friendly_name) VALUES('StravaGatewayService', 'Strava');" && \
-    service mysql stop
+    service mysql stop && \
+    touch /var/spool/cron/crontabs/root && \
+    { crontab -l; echo "* * * * * cd / && php artisan schedule:run >> /dev/null 2>&1"; } | crontab -
 
 EXPOSE $WEB_SERVER_PORT
 
-ENTRYPOINT rm -f /var/run/mysqld/* && service mysql start && php -S 0.0.0.0:$WEB_SERVER_PORT -t ./public
+ENTRYPOINT rm -f /var/run/mysqld/* && service mysql start && service cron start && php -S 0.0.0.0:$WEB_SERVER_PORT -t ./public
