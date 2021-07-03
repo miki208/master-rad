@@ -181,7 +181,7 @@ class StravaController extends Controller
 
             if($response->getStatusCode() != Response::HTTP_OK)
             {
-                if($response->getStatusCode() == Response::HTTP_TOO_MANY_REQUESTS) // we have to signalize to the sender to stop sending new requests
+                if($response->getStatusCode() == Response::HTTP_TOO_MANY_REQUESTS) // we have to signalize the sender to stop sending new requests
                     return response()->json("Too Many Requests; rate limits exceeded.", Response::HTTP_TOO_MANY_REQUESTS, [], JSON_UNESCAPED_SLASHES);
                 else
                     return ResponseHelper::GenerateSimpleTextResponse('Getting new activities failed.', Response::HTTP_BAD_REQUEST);

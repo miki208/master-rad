@@ -29,6 +29,8 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->call(function() {
+            $syncingOperationStartedAt = time(); // we want to limit how much time this syncing job takes (we have to avoid two parallel jobs)
+
             // get authorized external accounts that are not synced more than 24 hours
             $externalAccounts = ExternalAccount::where('confirmation_id', ExternalAccount::CONFIRMATION_ID_AUTHORIZED)
                 ->where(function ($query)
@@ -39,6 +41,9 @@ class Kernel extends ConsoleKernel
 
             foreach($externalAccounts as $externalAccount)
             {
+                if(time() - $syncingOperationStartedAt > 13 * 60) // we'll set syncing threshold to 13 minutes (another job will kick in 2 minutes)
+                    return;
+
                 // first check if the access token should be refreshed
                 if(ServiceSpecificHelper::should_refresh_access_token($externalAccount->expires_at))
                 {
@@ -76,8 +81,11 @@ class Kernel extends ConsoleKernel
                 if($response->getStatusCode() === Response::HTTP_TOO_MANY_REQUESTS)
                     return;
 
-                // ok, we can proceed and send activities to the matching engine
-                $matchingEngineResponse = HttpHelper::request('post', 'MatchingEngineService', '/activities', [], $response->json());
+                // ok, we can proceed and forward activities to the matching engine
+                $matchingEngineResponse = HttpHelper::request('post', 'MatchingEngineService', '/activities', [], [
+                    'runner_id' => $externalAccount->runner_id,
+                    'activities' => $response->json()
+                ], true);
 
                 if($matchingEngineResponse === null) // matching engine is not available right now, stop all syncing operations
                     return;

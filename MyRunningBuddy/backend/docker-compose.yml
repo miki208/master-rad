@@ -42,5 +42,16 @@ services:
             - my-running-buddy-network
         depends_on:
             - service-registry
+    matching-engine-service:
+        build: ./MatchingEngineService
+        image: matching-engine-service
+        environment:
+            - WEB_SERVER_PORT=8000
+        expose:
+            - "8000"
+        networks:
+            - my-running-buddy-network
+        depends_on:
+            - service-registry
 networks:
     my-running-buddy-network:
