@@ -64,13 +64,20 @@ class Kernel extends ConsoleKernel
                     }
                 }
 
-                $firstSync = false;
+                // if the account has never been synced, sync the last 4 weeks, else get all activities since the last sync
                 if($externalAccount->last_sync === null)
-                    $firstSync = true;
+                {
+                    $four_weeks = 4 * 7 * 24 * 60 * 60;
+                    $activities_after = $syncingOperationStartedAt - $four_weeks;
+                }
+                else
+                {
+                    $activities_after = $externalAccount->last_sync;
+                }
 
                 $response = HttpHelper::request('get', $externalAccount->service_name, '/activities', [], [
                     'access_token' => $externalAccount->access_token,
-                    'first_sync' => $firstSync
+                    'activities_after' => $activities_after
                 ], true);
 
                 // service is unavailable (or it was unavailable recently), let's try again a little bit later
@@ -93,7 +100,7 @@ class Kernel extends ConsoleKernel
                 // mark this operation as a successful sync
                 if($matchingEngineResponse->getStatusCode() === Response::HTTP_OK)
                 {
-                    $externalAccount->last_sync = time();
+                    $externalAccount->last_sync = $syncingOperationStartedAt;
 
                     $externalAccount->save();
                 }

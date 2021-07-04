@@ -155,26 +155,21 @@ class StravaController extends Controller
     public function get_activities(Request $request)
     {
         $access_token = $request->get('access_token');
-        $first_sync = $request->get('first_sync');
+        $activities_after = $request->get('activities_after');
 
         if($access_token == null)
             return ResponseHelper::GenerateSimpleTextResponse('Access token is missing.', Response::HTTP_BAD_REQUEST);
 
-        if($first_sync == null)
-            $first_sync = false;
-
-        $activitiesAfter = time();
-        if($first_sync)
-            $activitiesAfter = $activitiesAfter - 4 * 7 * 24 * 60 * 60; // 4 weeks
-        else
-            $activitiesAfter = $activitiesAfter - 24 * 60 * 60 - 15 * 60; // 1 day and 15 min
+        $four_weeks_ago = time() - 4 * 7 * 24 * 60 * 60;
+        if($activities_after === null or $activities_after < $four_weeks_ago)
+            $activities_after = $four_weeks_ago;
 
         try
         {
             $response = Http::withHeaders([
                 'Authorization' => "Bearer $access_token"
             ])->get('https://www.strava.com/api/v3/athlete/activities', [
-                'after' => $activitiesAfter,
+                'after' => $activities_after,
                 'page' => 1,
                 'per_page' => 100
             ]);
@@ -194,11 +189,11 @@ class StravaController extends Controller
                 if($activity['type'] == 'Run' and $activity['trainer'] == false and $activity['manual'] == false)
                 {
                     array_push($activitiesResponse, [
-                        'id' => 'strava_' . $activity['id'],
+                        'activity_id' => 'strava_' . $activity['id'],
                         'distance_km' => $activity['distance'] * 1.0 / 1000,
                         'moving_time_sec' => $activity['moving_time'],
                         'total_elevation_gain_m' => $activity['total_elevation_gain'],
-                        'start_date_gmt' => $activity['start_date'],
+                        'start_date' => strtotime($activity['start_date']),
                         'start_latlng' => $activity['start_latlng'],
                         'end_latlng' => $activity['end_latlng'],
                         'pace' => 1000.0 / (60 * $activity['average_speed'])
