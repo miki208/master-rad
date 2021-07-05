@@ -182,17 +182,39 @@ class RunnerController extends Controller
         if (Runner::where('id', $id)->count() != 1)
             return ResponseHelper::GenerateSimpleTextResponse("Runner doesn't exist.", Response::HTTP_NOT_FOUND);
 
-        // check if the service exists
-        if (ExternalService::where('service_name', $service_name)->count() != 1)
-            return ResponseHelper::GenerateSimpleTextResponse("External service doesn't exist.", Response::HTTP_NOT_FOUND);
+        if($service_name === 'all')
+        {
+            $externalAccounts = ExternalAccount::where('runner_id', $id)->where('confirmation_id', ExternalAccount::CONFIRMATION_ID_AUTHORIZED)->get();
 
-        $externalAccount = ExternalAccount::where('runner_id', $id)
-            ->where('service_name', $service_name)
-            ->where('confirmation_id', ExternalAccount::CONFIRMATION_ID_AUTHORIZED)->first();
+            $result = true;
+            foreach($externalAccounts as $externalAccount)
+                $result = $this->revoke_authorization($externalAccount->service_name, $externalAccount) and $result;
 
-        if($externalAccount == null)
-            return ResponseHelper::GenerateSimpleTextResponse("Runner doesn't have a linked account for this external service.", Response::HTTP_BAD_REQUEST);
+            if(!$result)
+                return ResponseHelper::GenerateSimpleTextResponse("Revoking the authorization for several services failed.", Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+        else
+        {
+            // check if the service exists
+            if (ExternalService::where('service_name', $service_name)->count() !== 1)
+                return ResponseHelper::GenerateSimpleTextResponse("External service doesn't exist.", Response::HTTP_NOT_FOUND);
 
+            $externalAccount = ExternalAccount::where('runner_id', $id)
+                ->where('service_name', $service_name)
+                ->where('confirmation_id', ExternalAccount::CONFIRMATION_ID_AUTHORIZED)->first();
+
+            if($externalAccount == null)
+                return ResponseHelper::GenerateSimpleTextResponse("Runner doesn't have a linked account for this external service.", Response::HTTP_BAD_REQUEST);
+
+            if(!$this->revoke_authorization($service_name, $externalAccount))
+                return ResponseHelper::GenerateSimpleTextResponse("Revoking the authorization for $service_name failed.", Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        return ResponseHelper::GenerateSimpleTextResponse('Authorization for external service(s) successfully revoked.', Response::HTTP_OK);
+    }
+
+    private function revoke_authorization($service_name, $externalAccount)
+    {
         if(ServiceSpecificHelper::should_refresh_access_token($externalAccount->expires_at))
         {
             $new_tokens = ServiceSpecificHelper::refresh_access_token($externalAccount->refresh_token, $service_name);
@@ -213,6 +235,6 @@ class RunnerController extends Controller
         // this request may be successful or not, we're not going to retry if it fails, we marked authorization params as revoked in our db
         HttpHelper::request('delete', $service_name, '/access_token', [], ['access_token' => $access_token]);
 
-        return ResponseHelper::GenerateSimpleTextResponse('Authorization for external service successfully revoked.', Response::HTTP_OK);
+        return true;
     }
 }

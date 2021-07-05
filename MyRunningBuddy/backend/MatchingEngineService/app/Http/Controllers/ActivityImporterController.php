@@ -8,7 +8,6 @@ use App\Models\RunnerStats;
 use App\Models\RunningLocation;
 use Illuminate\Http\Response;
 use Illuminate\Http\Request;
-use Log;
 
 class ActivityImporterController extends Controller
 {

@@ -64,5 +64,12 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     // get params needed to initiate authorization with an external service
     $router->get('/user/{id}/external_service_authorization_params', ['uses' => 'UserController@get_external_service_authorization_params']);
 
+    // revoke authorization params for the given service
     $router->delete('/user/{id}/external_service/{service_name}', ['uses' => 'UserController@revoke_authorization_to_external_service']);
+
+    // get running stats for the user
+    $router->get('/user/{id}/stats', ['uses' => 'UserController@get_runner_stats']);
+
+    // set running stats for the user (used as alternative for the users who don't want to sync their data from external services)
+    $router->post('/user/{id}/stats', ['uses' => 'UserController@set_runner_stats']);
 });

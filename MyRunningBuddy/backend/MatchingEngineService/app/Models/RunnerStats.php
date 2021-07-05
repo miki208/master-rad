@@ -22,7 +22,7 @@ class RunnerStats extends Model
     ];
 
     protected $hidden = [
-
+        'id', 'runner_id', 'created_at', 'updated_at'
     ];
 
     public static function calculate_avg_per_week($activities, $field_name)
@@ -115,6 +115,8 @@ class RunnerStats extends Model
 
         if(count($times) === 0)
             return null;
+
+        sort($times);
 
         $len = count($times);
 
