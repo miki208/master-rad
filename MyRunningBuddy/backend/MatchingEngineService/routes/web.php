@@ -21,3 +21,4 @@ $router->get('/status', function() {
 $router->post('/activities', ['uses' => 'ActivityImporterController@import_activities']);
 $router->get('/matcher/stats/{runner_id}', ['uses' => 'StatsController@get_stats']);
 $router->post('/matcher/stats/{runner_id}', ['uses' => 'StatsController@set_stats']);
+$router->get('/matcher/next_match/{runner_id}', ['uses' => 'MatcherController@find_partner']);

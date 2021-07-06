@@ -72,4 +72,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 
     // set running stats for the user (used as alternative for the users who don't want to sync their data from external services)
     $router->post('/user/{id}/stats', ['uses' => 'UserController@set_runner_stats']);
+
+    // get next potential running partner
+    $router->get('/user/{id}/next_match', ['uses' => 'UserController@get_next_match']);
 });

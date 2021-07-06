@@ -62,6 +62,7 @@ $app->singleton(
 $app->configure('app');
 $app->configure('httpclient');
 $app->configure('serviceregistry');
+$app->configure('matchingengine');
 
 /*
 |--------------------------------------------------------------------------

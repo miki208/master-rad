@@ -43,7 +43,7 @@ class UserController extends Controller
             return ResponseHelper::GenerateInternalServiceUnavailableErrorResponse();
 
         // check if this operation was successful, and if it isn't try to return a meaningful error
-        if($response->status() != Response::HTTP_CREATED || !isset($response['runner']['id']))
+        if($response->getStatusCode() != Response::HTTP_CREATED || !isset($response['runner']['id']))
             return ResponseHelper::GenerateErrorResponseFromAnotherResponse($response, 'Internal service error');
 
         // if everything is ok, make a user
@@ -136,6 +136,25 @@ class UserController extends Controller
         return $this->check_user_and_pass_to_another_service($request, 'post', $id, "/matcher/stats/$id", 'MatchingEngineService');
     }
 
+    public function get_next_match(Request $request, $id)
+    {
+        $id = $this->preprocess_userid_if_needed($id);
+
+        $response = $this->check_user_and_pass_to_another_service($request, 'get', $id, "/matcher/next_match/$id", 'MatchingEngineService');
+        if($response->status() !== Response::HTTP_OK)
+            return $response;
+
+        // we'll extend response and append additional data about the matched user
+        $response = json_decode($response->content(), true);
+        $matched_id = $response['suggested_runner']['runner_id'];
+
+        $userInfoResponse = $this->check_user_and_pass_to_another_service($request, 'get', $matched_id, "/runner/$matched_id", 'RunnerManagementService');
+        if($userInfoResponse->status() === Response::HTTP_OK)
+            $response['suggested_runner']['info'] = json_decode($userInfoResponse->content(), true);
+
+        return response()->json($response, Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
+    }
+
     private function preprocess_userid_if_needed($id)
     {
         // a special case when the user want to initiate an operation by using 'me' instead of a real user id in the route
@@ -164,7 +183,7 @@ class UserController extends Controller
         if($response == null)
             return ResponseHelper::GenerateInternalServiceUnavailableErrorResponse();
 
-        if($response->status() != Response::HTTP_OK)
+        if($response->getStatusCode() != Response::HTTP_OK)
             return ResponseHelper::GenerateErrorResponseFromAnotherResponse($response, 'Internal service error');
 
         // everything is ok

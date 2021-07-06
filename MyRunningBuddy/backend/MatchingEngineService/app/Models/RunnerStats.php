@@ -25,6 +25,11 @@ class RunnerStats extends Model
         'id', 'runner_id', 'created_at', 'updated_at'
     ];
 
+    public static function get_runner_stats_by_runner_id($runner_id)
+    {
+        return RunnerStats::where('runner_id', $runner_id)->first();
+    }
+
     public static function calculate_avg_per_week($activities, $field_name)
     {
         $newestActivity = $activities->first();
