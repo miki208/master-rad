@@ -22,7 +22,8 @@
         "files": [
             "app/Helpers/HttpHelper.php",
             "app/Helpers/ResponseHelper.php",
-            "app/Helpers/CommonHelper.php"
+            "app/Helpers/CommonHelper.php",
+            "app/Helpers/ServiceSpecificHelper.php"
         ]
     },
     "autoload-dev": {

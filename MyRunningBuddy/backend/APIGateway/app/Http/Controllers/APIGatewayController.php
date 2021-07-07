@@ -11,7 +11,7 @@ use Illuminate\Http\Response;
 use Validator;
 use Auth;
 
-class UserController extends Controller
+class APIGatewayController extends Controller
 {
     private $userChecked; // used to indicate whether the existence of the user id is already checked for the ongoing request
 
@@ -153,6 +153,20 @@ class UserController extends Controller
             $response['suggested_runner']['info'] = json_decode($userInfoResponse->content(), true);
 
         return response()->json($response, Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
+    }
+
+    public function match_action(Request $request, $runner_id, $suggested_runner)
+    {
+        $runner_id = $this->preprocess_userid_if_needed($runner_id);
+
+        return $this->check_user_and_pass_to_another_service($request, 'post', $runner_id, "/matcher/match/$runner_id/$suggested_runner", 'MatchingEngineService');
+    }
+
+    public function get_all_matches(Request $request, $id)
+    {
+        $id = $this->preprocess_userid_if_needed($id);
+
+        return $this->check_user_and_pass_to_another_service($request, 'get', $id, "/matcher/$id/matches", 'MatchingEngineService');
     }
 
     private function preprocess_userid_if_needed($id)

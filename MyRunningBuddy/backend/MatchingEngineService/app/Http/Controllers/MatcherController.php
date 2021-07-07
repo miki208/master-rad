@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\CommonHelper;
 use App\Helpers\ResponseHelper;
+use App\Helpers\ServiceSpecificHelper;
 use App\Models\PotentialMatch;
 use App\Models\RunnerStats;
 use App\Models\RunningLocation;
@@ -37,9 +38,7 @@ class MatcherController extends Controller
 
     public function find_partner(Request $request, $runner_id)
     {
-        $authenticated_user = $request->header('X-User');
-
-        if($authenticated_user == null or $authenticated_user != $runner_id)
+        if(!ServiceSpecificHelper::check_if_authorized($request, $runner_id))
             return ResponseHelper::GenerateSimpleTextResponse('Unauthorized.', Response::HTTP_UNAUTHORIZED);
 
         // data validation
@@ -126,6 +125,76 @@ class MatcherController extends Controller
         }
 
         return response()->json($scoredMatches[0], Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
+    }
+
+    public function match_action(Request $request, $runner_id, $suggested_runner)
+    {
+        if(!ServiceSpecificHelper::check_if_authorized($request, $runner_id))
+            return ResponseHelper::GenerateSimpleTextResponse('Unauthorized.', Response::HTTP_UNAUTHORIZED);
+
+        $validator = Validator::make($request->all(), [
+            'action' => 'required|string|in:accept,reject'
+        ]);
+
+        if($validator->fails())
+            return ResponseHelper::GenerateValidatorErrorMessage($validator->errors());
+
+        $potentialMatch = PotentialMatch::where('runner_id', $runner_id)->where('accepted', null)->orderBy('id', 'asc')->first();
+        if($potentialMatch === null or $potentialMatch->suggested_runner != $suggested_runner)
+            return ResponseHelper::GenerateSimpleTextResponse('This potential match does not exist.', Response::HTTP_BAD_REQUEST);
+
+        // find the other side of the match
+        $potentialMatchOtherSide = PotentialMatch::where('runner_id', $suggested_runner)->where('suggested_runner', $runner_id)->first();
+        if($potentialMatchOtherSide === null)
+            return ResponseHelper::GenerateSimpleTextResponse("Unexpected error. Potential match is incomplete.", Response::HTTP_INTERNAL_SERVER_ERROR);
+
+        $action = $request->get('action');
+        if($action === 'accept')
+        {
+            $potentialMatch->accepted = true;
+            $potentialMatch->save();
+
+            if($potentialMatchOtherSide->accepted === true)
+            {
+                // matching is complete
+                // TODO: create a message conversation for these runners
+                // TODO: maybe send some kind of notification too?
+
+                return response()->json(['status' => 'matched'], Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
+            }
+            else
+            {
+                return response()->json(['status' => 'accepted'], Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
+            }
+        }
+        else
+        {
+            $potentialMatch->accepted = false;
+            $potentialMatch->save();
+
+            $potentialMatchOtherSide->accepted = false;
+            $potentialMatchOtherSide->save();
+
+            return response()->json(['status' => 'rejected'], Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
+        }
+    }
+
+    public function get_all_matches(Request $request, $runner_id)
+    {
+        if(!ServiceSpecificHelper::check_if_authorized($runner_id))
+            return ResponseHelper::GenerateSimpleTextResponse('Unauthorized.', Response::HTTP_UNAUTHORIZED);
+
+        $input = $request->only(['page', 'num_of_results_per_page']);
+
+        $page = $request->get('page', 1);
+        $num_of_results_per_page = $request->get('num_of_results_per_page', 10);
+
+        if($num_of_results_per_page > 50)
+            $num_of_results_per_page = 50;
+
+        $matches = PotentialMatch::get_matches($runner_id, $page, $num_of_results_per_page);
+
+        return response()->json($matches, Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
     }
 
     private static function generate_response_data($thisRunnerLocation, $thisRunnerStats, $potentialMatchLocation, $potentialMatchStats, $score)
