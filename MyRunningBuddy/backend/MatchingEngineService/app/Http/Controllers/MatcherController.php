@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\CommonHelper;
+use App\Helpers\HttpHelper;
 use App\Helpers\ResponseHelper;
 use App\Helpers\ServiceSpecificHelper;
 use App\Models\PotentialMatch;
@@ -152,18 +153,25 @@ class MatcherController extends Controller
         if($action === 'accept')
         {
             $potentialMatch->accepted = true;
-            $potentialMatch->save();
 
-            if($potentialMatchOtherSide->accepted === true)
+            if($potentialMatchOtherSide->accepted == true)
             {
-                // matching is complete
-                // TODO: create a message conversation for these runners
-                // TODO: maybe send some kind of notification too?
+                // matching is complete, create conversation for these users so they can contact each other
+                $response = HttpHelper::request('post', 'MessagingService', '/messages', [], ['runner_id1' => $runner_id, 'runner_id2' => $suggested_runner]);
+                if($response == null)
+                    return ResponseHelper::GenerateInternalServiceUnavailableErrorResponse();
+
+                if($response->getStatusCode() != Response::HTTP_CREATED)
+                    return ResponseHelper::GenerateErrorResponseFromAnotherResponse($response);
+
+                $potentialMatch->save();
 
                 return response()->json(['status' => 'matched'], Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
             }
             else
             {
+                $potentialMatch->save();
+
                 return response()->json(['status' => 'accepted'], Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
             }
         }
@@ -181,7 +189,7 @@ class MatcherController extends Controller
 
     public function get_all_matches(Request $request, $runner_id)
     {
-        if(!ServiceSpecificHelper::check_if_authorized($runner_id))
+        if(!ServiceSpecificHelper::check_if_authorized($request, $runner_id))
             return ResponseHelper::GenerateSimpleTextResponse('Unauthorized.', Response::HTTP_UNAUTHORIZED);
 
         $input = $request->only(['page', 'num_of_results_per_page']);
