@@ -19,7 +19,7 @@ class Message extends Model
     {
         return Message::where('conversation_id', $conversationId)
             ->where('id', '>', $from_id)
-            ->orderBy('id', 'asc')
+            ->orderBy('id', 'desc')
             ->skip(($page - 1) * $num_of_results_per_page)
             ->take($num_of_results_per_page)
             ->get();

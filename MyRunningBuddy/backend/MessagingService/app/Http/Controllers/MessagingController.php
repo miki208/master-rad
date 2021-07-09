@@ -95,6 +95,8 @@ class MessagingController extends Controller
 
         $message->save();
 
+        $conversation->touch();
+
         return ResponseHelper::GenerateSimpleTextResponse('Message created.', Response::HTTP_CREATED);
     }
 }

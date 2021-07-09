@@ -38,7 +38,7 @@ class Conversation extends Model
     {
         return Conversation::where('runner_id1', $runner_id1)
             ->orWhere('runner_id2', $runner_id1)
-            ->orderBy('id', 'asc')
+            ->orderBy('updated_at', 'desc')
             ->skip(($page - 1) * $num_of_results_per_page)
             ->take($num_of_results_per_page)
             ->get();
