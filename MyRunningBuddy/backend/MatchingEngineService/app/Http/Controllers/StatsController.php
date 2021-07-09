@@ -16,7 +16,7 @@ class StatsController extends Controller
         $runnerStats = RunnerStats::get_runner_stats_by_runner_id($runner_id);
 
         if($runnerStats === null)
-            return ResponseHelper::GenerateSimpleTextResponse('This user does not have stats.', Response::HTTP_BAD_REQUEST);
+            return ResponseHelper::GenerateSimpleTextResponse('This user does not have stats.', Response::HTTP_NOT_FOUND);
 
         $response = ['stats' => $runnerStats];
 

@@ -169,6 +169,27 @@ class APIGatewayController extends Controller
         return $this->check_user_and_pass_to_another_service($request, 'get', $id, "/matcher/$id/matches", 'MatchingEngineService');
     }
 
+    public function add_message(Request $request, $id, $user_id2)
+    {
+        $id = $this->preprocess_userid_if_needed($id);
+
+        return $this->check_user_and_pass_to_another_service($request, 'post', $id, "/messages/$id/$user_id2", 'MessagingService');
+    }
+
+    public function get_conversations(Request $request, $id)
+    {
+        $id = $this->preprocess_userid_if_needed($id);
+
+        return $this->check_user_and_pass_to_another_service($request, 'get', $id, "/messages/$id", 'MessagingService');
+    }
+
+    public function get_conversation(Request $request, $id, $user_id2)
+    {
+        $id = $this->preprocess_userid_if_needed($id);
+
+        return $this->check_user_and_pass_to_another_service($request, 'get', $id, "/messages/$id/$user_id2", 'MessagingService');
+    }
+
     private function preprocess_userid_if_needed($id)
     {
         // a special case when the user want to initiate an operation by using 'me' instead of a real user id in the route
@@ -197,7 +218,7 @@ class APIGatewayController extends Controller
         if($response == null)
             return ResponseHelper::GenerateInternalServiceUnavailableErrorResponse();
 
-        if($response->getStatusCode() != Response::HTTP_OK)
+        if($response->getStatusCode() != Response::HTTP_OK && $response->getStatusCode() != Response::HTTP_CREATED)
             return ResponseHelper::GenerateErrorResponseFromAnotherResponse($response, 'Internal service error');
 
         // everything is ok

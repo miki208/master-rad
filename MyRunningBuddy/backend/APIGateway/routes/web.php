@@ -81,4 +81,13 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 
     // get all matches
     $router->get('/user/{id}/matches', ['uses' => 'APIGatewayController@get_all_matches']);
+
+    // send new message to an already existing conversation
+    $router->post('/user/{id}/messages/{user_id2}', ['uses' => 'APIGatewayController@add_message']);
+
+    // get all conversations for the user
+    $router->get('/user/{id}/messages', ['uses' => 'APIGatewayController@get_conversations']);
+
+    // get messages from the specific conversation
+    $router->get('/user/{id}/messages/{user_id2}', ['uses' => 'APIGatewayController@get_conversation']);
 });

@@ -19,3 +19,6 @@ $router->get('/status', function() {
 });
 
 $router->post('/messages', ['uses' => 'MessagingController@create_conversation']);
+$router->post('/messages/{runner_id1}/{runner_id2}', ['uses' => 'MessagingController@add_message']);
+$router->get('/messages/{runner_id}', ['uses' => 'MessagingController@get_conversations']);
+$router->get('/messages/{runner_id1}/{runner_id2}', ['uses' => 'MessagingController@get_conversation']);
