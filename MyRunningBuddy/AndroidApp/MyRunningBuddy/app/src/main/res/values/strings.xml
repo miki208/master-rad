@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">MyRunningBuddy</string>
+    <string name="sign_in_to_start">Sign in to start</string>
+    <string name="find_your_running_motivation">Find your running motivation</string>
+    <string name="email">email</string>
+    <string name="email_address">email address</string>
+    <string name="password">password</string>
+    <string name="sign_in">SIGN IN</string>
+    <string name="don_t_have_an_account_sign_up_here">Don\'t have an account? Sign up here</string>
+    <string name="API_ACCESS_TOKEN">API_ACCESS_TOKEN</string>
+    <string name="API_REFRESH_TOKEN">API_REFRESH_TOKEN</string>
+    <string name="API_EXPIRES_AT">API_EXPIRES_AT</string>
+</resources>
