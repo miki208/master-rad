@@ -5,9 +5,23 @@
     <string name="email">email</string>
     <string name="email_address">email address</string>
     <string name="password">password</string>
+    <string name="email_address_required">email address (required)</string>
+    <string name="password_required">password (required)</string>
     <string name="sign_in">SIGN IN</string>
     <string name="don_t_have_an_account_sign_up_here">Don\'t have an account? Sign up here</string>
     <string name="API_ACCESS_TOKEN">API_ACCESS_TOKEN</string>
     <string name="API_REFRESH_TOKEN">API_REFRESH_TOKEN</string>
     <string name="API_EXPIRES_AT">API_EXPIRES_AT</string>
+    <string name="sign_up">SIGN UP</string>
+    <string name="surname">surname</string>
+    <string name="name_required">name (required)</string>
+    <string name="location">location</string>
+    <string name="write_something_about_yourself">write something about yourself</string>
+    <string name="fill_in_basic_info">Fill in basic info</string>
+    <string name="you_re_just_one_step_from_your_motivation">You\'re just one step from your motivation</string>
+    <string name="already_have_an_account_sign_in_here">Already have an account? Sign in here</string>
+    <string name="user_successfully_registered">User successfully registered</string>
+    <string name="internal_service_unavailable">Internal service is currently unavailable</string>
+    <string name="internal_service_error">Internal service error</string>
+    <string name="unexpected_error">Unexpected error</string>
 </resources>
