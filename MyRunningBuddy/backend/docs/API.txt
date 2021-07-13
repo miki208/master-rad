@@ -1,0 +1,173 @@
+Non-authorized requests
+    POST /oauth/token
+        Description: request a new access token (+ refresh token)
+        Input
+            email (required, string)
+            password (required, string)
+            grant_type (required, string = password)
+            client_id (required, int)
+            client_secret (required, string)
+        Output
+            OK
+                {
+                    token_type => "Bearer"
+                    expires_in => {seconds}
+                    access_token => {access token}
+                    refresh_token => {refresh token}
+                }
+            UNAUTHORIZED
+                invalid client id or secret
+            BAD_REQUEST
+                invalid user credentials
+
+    POST /users
+        Description: register a new user
+        Input
+            email (required, string)
+            password (required, string)
+            name (required, string)
+            surname (string)
+            aboutme (string)
+            location (string)
+        Output
+            CREATED
+                {
+                    user => {user representation},
+                    message => 'User created successfully.',
+                    actions => { get => '/user/me', patch '/user/me' }
+                }
+            BAD_REQUEST
+                data validation failed
+            INTERNAL_SERVER_ERROR
+                internal service is currently unavailable
+    
+    GET /status
+        Description: health check for API Gateway
+        Input
+        Output
+            OK
+                {
+                    status => 'ok'
+                }
+    
+    GET /system_status
+        Description: get the status of the system as whole
+        Input
+        Output
+            OK
+                {
+                    services => [ { id => {service id}, service_name => {service name}, last_status => {last status}, updated_at => {updated at} }, ...]
+                }
+            INTERNAL_SERVER_ERROR
+                internal service is currently unavailable
+                
+    GET /authorization_grant_callback/{service_name}/{confirmation_id}
+        Description: callback for accepting authorization grant from external services
+        Input
+            service_name (required, string)
+            confirmation_id (required, int)
+            scope (required, string)
+            error
+        OUTPUT
+            OK
+                {
+                    message => 'Authorization successful.'
+                }
+            BAD_REQUEST
+                data validation failed
+                authorization to external service failed
+            INTERNAL_SERVER_ERROR
+                internal service is currently unavailable
+                external service gateway isn't configured correctly
+            BAD_GATEWAY
+                external service is currently unavailable
+                
+Authorized requests
+    GET /oauth/tokens
+        Description: get all of the authorized access tokens that the authenticated user has created
+        Input
+        Output
+            OK
+                list of tokens
+        
+    DELETE /oauth/tokens/{tokenId}
+        Description: revoke a specific access token
+    
+    POST oauth/token/refresh
+        Description: refresh a specific access token
+        Input
+            grant_type => "refresh_token"
+            refresh_token => {refresh token}
+            client_id => {client id}
+            client_secret => {client secret}
+
+    GET /user/{id}
+        Description: get user account info (runner profile + stats + linked external accounts)
+        Input
+        Output
+            OK
+                {
+                    ...
+                    runner representation fields
+                    ...,
+                    linked_services => [ { service => { id => {id}, service_name => {service_name}, human_friendly_name => {human friendly name} }, linked => true,false} , ...] (if available),
+                    stats => { stats => { runner stats... }, location => [lat, lng] } (if available)
+                }
+            INTERNAL_SERVER_ERROR
+                internal service is currently unavailable
+            BAD_REQUEST
+                user doesn't exist
+    
+    PATCH /user/{id}
+        Description: update runner info
+        Input
+            all runner fields 
+        Output
+            OK
+                updated representation of runner
+            BAD_REQUEST
+                user doesn't exist
+                data validaiton failed
+            INTERNAL_SERVER_ERROR
+                internal service is currently unavailable
+    
+    GET /user/{id}/linked_services
+        Description: get linked external accounts for the user
+        Input
+        Output
+            OK
+                linked_services => linked_services => [ { service => { id => {id}, service_name => {service_name}, human_friendly_name => {human friendly name} }, linked => true,false} , ...]
+            BAD_REQUEST
+                user doesn't exist
+            INTERNAL_SERVER_ERROR
+                internal service is currently unavailable
+    
+    GET /user/{id}/external_service_authorization_params
+        Description: get authorization params for specific external service
+    
+    DELETE /user/{id}/external_service/{service_name}
+        Description: revoke the access token for the specific external service
+    
+    GET /user/{id}/stats
+        Description: get user running stats
+    
+    POST /user/{id}/stats
+        Description: update user running stats
+    
+    GET /user/{id}/next_match
+        Description: return the next recommended match if available
+    
+    POST /matcher/match/{runner_id}/{suggested_runner}
+        Description: accept or reject a suggested match
+    
+    GET /user/{id}/matches
+        Description: get all successful matches
+    
+    POST /user/{id}/messages/{user_id2}
+        Description: add message to specific conversation
+    
+    GET /user/{id}/messages
+        Description: get conversations for the user
+    
+    GET /user/{id}/messages/{user_id2}
+        Description: get messages from the specific conversation

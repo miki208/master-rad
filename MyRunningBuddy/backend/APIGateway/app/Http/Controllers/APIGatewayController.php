@@ -76,7 +76,7 @@ class APIGatewayController extends Controller
         // append linked services info if available
         $linkedServicesResponse = $this->check_user_and_pass_to_another_service($request, 'get', $id, "/runner/$id/linked_services", 'RunnerManagementService');
         if($linkedServicesResponse->status() === Response::HTTP_OK)
-            $response['linked_services'] = json_decode($linkedServicesResponse->content(), true);
+            $response['linked_services'] = json_decode($linkedServicesResponse->content(), true)['linked_services'] ?? null;
 
         // append stats if available
         $statsResponse = $this->check_user_and_pass_to_another_service($request, 'get', $id, "/matcher/stats/{$id}", 'MatchingEngineService');
@@ -203,7 +203,7 @@ class APIGatewayController extends Controller
     {
         // first check if user exists
         if(!$this->userChecked and User::where('id', $id)->count() != 1)
-            return ResponseHelper::GenerateSimpleTextResponse("User doesn't exist.", Response::HTTP_NOT_FOUND);
+            return ResponseHelper::GenerateSimpleTextResponse("User doesn't exist.", Response::HTTP_BAD_REQUEST);
         else
             $this->userChecked = true;
 

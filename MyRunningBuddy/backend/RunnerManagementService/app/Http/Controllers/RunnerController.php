@@ -23,7 +23,6 @@ class RunnerController extends Controller
             'name' => 'required|string|max:30',
             'surname' => 'sometimes|string|max:30',
             'aboutme' => 'sometimes|string|max:256',
-            'preferences' => 'sometimes|string|max:256',
             'location' => 'sometimes|string|max:64'
         ]);
 
@@ -48,7 +47,7 @@ class RunnerController extends Controller
         $runner = Runner::where('id', $id)->first();
 
         if($runner == null)
-            return ResponseHelper::GenerateSimpleTextResponse("Runner doesn't exist.", Response::HTTP_NOT_FOUND);
+            return ResponseHelper::GenerateSimpleTextResponse("Runner doesn't exist.", Response::HTTP_BAD_REQUEST);
 
         return response()->json($runner, Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
     }
@@ -61,7 +60,7 @@ class RunnerController extends Controller
         $runner = Runner::where('id', $id)->first();
 
         if($runner == null)
-            return ResponseHelper::GenerateSimpleTextResponse("Runner doesn't exist.", Response::HTTP_NOT_FOUND);
+            return ResponseHelper::GenerateSimpleTextResponse("Runner doesn't exist.", Response::HTTP_BAD_REQUEST);
 
         // data validation
         $input = $request->all();
@@ -70,7 +69,6 @@ class RunnerController extends Controller
             'name' => 'sometimes|string|max:256',
             'surname' => 'sometimes|string|max:256',
             'aboutme' => 'sometimes|string|max:256',
-            'preferences' => 'sometimes|string|max:256',
             'location' => 'sometimes|string|max:64'
         ]);
 
@@ -105,7 +103,7 @@ class RunnerController extends Controller
             array_push($result, ['service' => $service, 'linked' => $linked]);
         }
 
-        return response()->json($result, Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
+        return response()->json(['linked_services' => $result], Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
     }
 
     public function get_external_service_authorization_params(Request $request, $id)

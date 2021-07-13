@@ -45,7 +45,7 @@ class MessagingController extends Controller
 
         $conversations = Conversation::getConversations($runner_id, $page, $num_of_results_per_page);
 
-        return response()->json($conversations, Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
+        return response()->json(['conversations' => $conversations], Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
     }
 
     public function get_conversation(Request $request, $runner_id1, $runner_id2)
@@ -66,7 +66,7 @@ class MessagingController extends Controller
 
         $messages = Message::getMessages($conversation->id, $page, $num_of_results_per_page, $from_id);
 
-        return response()->json($messages, Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
+        return response()->json(['messages' => $messages], Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
     }
 
     public function add_message(Request $request, $runner_id1, $runner_id2)

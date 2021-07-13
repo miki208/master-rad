@@ -202,7 +202,7 @@ class MatcherController extends Controller
 
         $matches = PotentialMatch::get_matches($runner_id, $page, $num_of_results_per_page);
 
-        return response()->json($matches, Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
+        return response()->json(['matches' => $matches], Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
     }
 
     private static function generate_response_data($thisRunnerLocation, $thisRunnerStats, $potentialMatchLocation, $potentialMatchStats, $score)

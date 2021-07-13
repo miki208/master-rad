@@ -43,7 +43,7 @@ $router->get("/system_status", function() {
         ]);
     }
 
-    return response()->json($response, \Illuminate\Http\Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
+    return response()->json(['services' => $response], \Illuminate\Http\Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
 });
 
 // callback for accepting authorization grant from external services
