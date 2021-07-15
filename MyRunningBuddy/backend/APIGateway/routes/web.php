@@ -70,9 +70,6 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     // get running stats for the user
     $router->get('/user/{id}/stats', ['uses' => 'APIGatewayController@get_runner_stats']);
 
-    // set running stats for the user (used as alternative for the users who don't want to sync their data from external services)
-    $router->post('/user/{id}/stats', ['uses' => 'APIGatewayController@set_runner_stats']);
-
     // get next potential running partner
     $router->get('/user/{id}/next_match', ['uses' => 'APIGatewayController@get_next_match']);
 

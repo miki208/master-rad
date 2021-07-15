@@ -124,18 +124,6 @@ class APIGatewayController extends Controller
         return $this->check_user_and_pass_to_another_service($request, 'get', $id, "/matcher/stats/$id", 'MatchingEngineService');
     }
 
-    public function set_runner_stats(Request $request, $id)
-    {
-        $id = $this->preprocess_userid_if_needed($id);
-
-        // if user wants to use custom stats used for matching, authorization for all external accounts will be revoked
-        $response = $this->check_user_and_pass_to_another_service($request, 'delete', $id, "/runner/$id/external_service/all", 'RunnerManagementService');
-        if($response->status() != Response::HTTP_OK)
-            return ResponseHelper::GenerateErrorResponseFromAnotherResponse($response, 'Internal service error');
-
-        return $this->check_user_and_pass_to_another_service($request, 'post', $id, "/matcher/stats/$id", 'MatchingEngineService');
-    }
-
     public function get_next_match(Request $request, $id)
     {
         $id = $this->preprocess_userid_if_needed($id);
