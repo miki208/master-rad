@@ -17,7 +17,6 @@ import java.net.HttpURLConnection;
 
 import rs.miki208.myrunningbuddy.helpers.APIWrapper;
 import rs.miki208.myrunningbuddy.helpers.AbstractAPIResponseHandler;
-import rs.miki208.myrunningbuddy.helpers.SharedPrefSingleton;
 
 public class LoginActivity extends AppCompatActivity {
     EditText etEmail;
@@ -63,7 +62,9 @@ public class LoginActivity extends AppCompatActivity {
 
                         // redirect to profile
                         Intent intent = new Intent(thisActivity, ProfileActivity.class);
-                        startActivity(intent);
+                        intent.putExtra("user_id", "me");
+
+                        thisActivity.startActivity(intent);
                         break;
                     case HttpURLConnection.HTTP_UNAUTHORIZED:
                         Toast.makeText(getApplicationContext(), "Unexpected error", Toast.LENGTH_LONG).show();

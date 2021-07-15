@@ -21,7 +21,10 @@
     <string name="you_re_just_one_step_from_your_motivation">You\'re just one step from your motivation</string>
     <string name="already_have_an_account_sign_in_here">Already have an account? Sign in here</string>
     <string name="user_successfully_registered">User successfully registered</string>
-    <string name="internal_service_unavailable">Internal service is currently unavailable</string>
+    <string name="internal_service_unavailable">Internal service is currently unavailable. Please try again later</string>
     <string name="internal_service_error">Internal service error</string>
     <string name="unexpected_error">Unexpected error</string>
+    <string name="about_me">about me</string>
+    <string name="runner_stats">runner stats</string>
+    <string name="unauthorized">Unauthorized</string>
 </resources>
