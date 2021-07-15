@@ -19,6 +19,7 @@ import java.io.UnsupportedEncodingException;
 import rs.miki208.myrunningbuddy.R;
 
 public class APIWrapper {
+    // helpers
     private static class DefaultResponseListener implements Response.Listener<JSONObject>, Response.ErrorListener
     {
         private AbstractAPIResponseHandler handler = null;
@@ -95,6 +96,29 @@ public class APIWrapper {
         return true;
     }
 
+    public static void SaveAuthorizationParams(Context ctx, String access_token, String refresh_token, long expires_in)
+    {
+        // save authorization params
+        SharedPrefSingleton.getInstance(ctx).SetValue(
+                "string",
+                ctx.getString(R.string.API_ACCESS_TOKEN),
+                access_token
+        );
+
+        SharedPrefSingleton.getInstance(ctx).SetValue(
+                "string",
+                ctx.getString(R.string.API_REFRESH_TOKEN),
+                refresh_token
+        );
+
+        SharedPrefSingleton.getInstance(ctx).SetValue(
+                "long",
+                ctx.getString(R.string.API_EXPIRES_AT),
+                System.currentTimeMillis() / 1000L + expires_in
+        );
+    }
+
+    // api calls
     public static boolean GetAccessToken(Context ctx, String email, String password, AbstractAPIResponseHandler handler) {
         JSONObject requestData = new JSONObject();
 
@@ -127,25 +151,21 @@ public class APIWrapper {
         return SendRequest(ctx, "POST", "/oauth/token", requestData, handler);
     }
 
-    public static void SaveAuthorizationParams(Context ctx, String access_token, String refresh_token, long expires_in)
+    public static boolean RegisterUser(Context ctx, String email, String password, String name, String surname, String location, String aboutme, AbstractAPIResponseHandler handler)
     {
-        // save authorization params
-        SharedPrefSingleton.getInstance(ctx).SetValue(
-                "string",
-                ctx.getString(R.string.API_ACCESS_TOKEN),
-                access_token
-        );
+        JSONObject requestData = new JSONObject();
 
-        SharedPrefSingleton.getInstance(ctx).SetValue(
-                "string",
-                ctx.getString(R.string.API_REFRESH_TOKEN),
-                refresh_token
-        );
+        try {
+            requestData.put("email", email);
+            requestData.put("password", password);
+            requestData.put("name", name);
+            requestData.put("surname", surname.equals("") ? JSONObject.NULL : surname);
+            requestData.put("aboutme", aboutme.equals("") ? JSONObject.NULL : aboutme);
+            requestData.put("location", location.equals("") ? JSONObject.NULL : location);
+        } catch (JSONException e) {
+            return false;
+        }
 
-        SharedPrefSingleton.getInstance(ctx).SetValue(
-                "long",
-                ctx.getString(R.string.API_EXPIRES_AT),
-                System.currentTimeMillis() / 1000L + expires_in
-        );
+        return SendRequest(ctx, "POST", "/users", requestData, handler);
     }
 }
