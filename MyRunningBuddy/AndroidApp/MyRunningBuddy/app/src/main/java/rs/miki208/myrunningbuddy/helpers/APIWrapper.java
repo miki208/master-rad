@@ -295,6 +295,19 @@ public class APIWrapper {
 
     public static boolean RegisterUser(Context ctx, String email, String password, String name, String surname, String location, String aboutme, AbstractAPIResponseHandler handler)
     {
+        email = email.trim();
+        name = name.trim();
+        surname = surname.trim();
+        location = location.trim();
+        aboutme = aboutme.trim();
+
+        if(name.equals("") || email.equals(""))
+        {
+            Toast.makeText(ctx, ctx.getString(R.string.didnt_fill_required_fields), Toast.LENGTH_LONG).show();
+
+            return false;
+        }
+
         Map<String, String> headers = new HashMap<>();
 
         JSONObject requestData = new JSONObject();
@@ -303,9 +316,15 @@ public class APIWrapper {
             requestData.put("email", email);
             requestData.put("password", password);
             requestData.put("name", name);
-            requestData.put("surname", surname.equals("") ? JSONObject.NULL : surname);
-            requestData.put("aboutme", aboutme.equals("") ? JSONObject.NULL : aboutme);
-            requestData.put("location", location.equals("") ? JSONObject.NULL : location);
+
+            if(!surname.equals(""))
+                requestData.put("surname", surname);
+
+            if(!aboutme.equals(""))
+                requestData.put("aboutme", aboutme);
+
+            if(!location.equals(""))
+                requestData.put("location", location);
         } catch (JSONException e) {
             return false;
         }
@@ -316,5 +335,37 @@ public class APIWrapper {
     public static boolean GetUser(Context ctx, String userId, AbstractAPIResponseHandler handler)
     {
         return SendAuthorizedRequest(ctx, "GET", "/user/" + userId, null, handler);
+    }
+
+    public static boolean GetNextMatch(Context ctx, String userId, AbstractAPIResponseHandler handler)
+    {
+        String priority_field = (String) SharedPrefSingleton.getInstance(ctx).GetValue("string", "priority_field");
+
+        JSONObject requestData = new JSONObject();
+        if(priority_field != null) {
+            try {
+                requestData.put("priority_field", priority_field);
+            } catch (JSONException ignored) {
+
+            }
+        }
+
+        return SendAuthorizedRequest(ctx, "GET", "/user/" + userId + "/next_match", requestData, handler);
+    }
+
+    public static boolean PostMatchAction(Context ctx, String userId, boolean accepted, AbstractAPIResponseHandler handler)
+    {
+        JSONObject requestData = new JSONObject();
+        try {
+            if (accepted)
+                requestData.put("action", "accept");
+            else
+                requestData.put("action", "reject");
+        }
+        catch (JSONException ignored) {
+
+        }
+
+        return SendAuthorizedRequest(ctx, "POST", "/matcher/match/me/" + userId, requestData, handler);
     }
 }

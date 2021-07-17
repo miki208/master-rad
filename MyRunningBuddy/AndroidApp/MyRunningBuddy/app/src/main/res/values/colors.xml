@@ -9,4 +9,6 @@
     <color name="white">#FFFFFFFF</color>
     <color name="colorBackgroundLayer">#C6000000</color>
     <color name="editTextHintColor">#BDBDBD</color>
+    <color name="rejectColor">#BA160C</color>
+    <color name="acceptColor">#A4C639</color>
 </resources>

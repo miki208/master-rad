@@ -3,13 +3,30 @@ package rs.miki208.myrunningbuddy.helpers;
 import android.content.Context;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import org.json.JSONObject;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.TimeZone;
 
+import rs.miki208.myrunningbuddy.R;
+
 public class ActivityHelper {
+    public static void FillProfileDataWidgets(AppCompatActivity activity, HashMap<String, TextView> profileDataWidgets)
+    {
+        profileDataWidgets.put("name", (TextView) activity.findViewById(R.id.tvName));
+        profileDataWidgets.put("location", (TextView) activity.findViewById(R.id.tvLocation));
+        profileDataWidgets.put("aboutme", (TextView) activity.findViewById(R.id.tvAboutme));
+        profileDataWidgets.put("avg_total_distance_per_week", (TextView) activity.findViewById(R.id.tvAvgTotalDistancePerWeek));
+        profileDataWidgets.put("avg_moving_time_per_week", (TextView) activity.findViewById(R.id.tvAvgMovingTimePerWeek));
+        profileDataWidgets.put("avg_longest_distance_per_week", (TextView) activity.findViewById(R.id.tvAvgLongestDistancePerWeek));
+        profileDataWidgets.put("avg_pace_per_week", (TextView) activity.findViewById(R.id.tvAvgPacePerWeek));
+        profileDataWidgets.put("avg_total_elevation_per_week", (TextView) activity.findViewById(R.id.tvAvgTotalElevationPerWeek));
+        profileDataWidgets.put("avg_start_time_per_week", (TextView) activity.findViewById(R.id.tvAvgStartTimePerWeek));
+    }
+
     public static void RenderProfile(Context activity, HashMap<String, TextView> profileDataWidgets, JSONObject user)
     {
         try
@@ -31,7 +48,7 @@ public class ActivityHelper {
             }
 
             String location = "";
-            if(user.has("location") && !user.isNull("location"))
+            if(user.has("location") && !user.isNull("location") && !user.getString("location").equals(""))
                 location = "@ " + user.getString("location");
 
             ((TextView) profileDataWidgets.get("location")).setText(location);
@@ -123,5 +140,19 @@ public class ActivityHelper {
         {
             ignore.printStackTrace();;
         }
+    }
+
+    public static void RenderClearProfile(Context activity, HashMap<String, TextView> profileDataWidgets)
+    {
+        ((TextView) profileDataWidgets.get("name")).setText("");
+        ((TextView) profileDataWidgets.get("aboutme")).setText("");
+        ((TextView) profileDataWidgets.get("location")).setText("");
+
+        ((TextView) profileDataWidgets.get("avg_total_distance_per_week")).setText("");
+        ((TextView) profileDataWidgets.get("avg_moving_time_per_week")).setText("");
+        ((TextView) profileDataWidgets.get("avg_longest_distance_per_week")).setText("");
+        ((TextView) profileDataWidgets.get("avg_pace_per_week")).setText("");
+        ((TextView) profileDataWidgets.get("avg_total_elevation_per_week")).setText("");
+        ((TextView) profileDataWidgets.get("avg_start_time_per_week")).setText("");
     }
 }

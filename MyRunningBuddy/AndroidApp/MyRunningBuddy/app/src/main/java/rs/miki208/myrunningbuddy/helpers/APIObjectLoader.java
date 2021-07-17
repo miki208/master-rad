@@ -14,7 +14,16 @@ import rs.miki208.myrunningbuddy.R;
 public class APIObjectLoader {
     public interface APIObjectListener
     {
-        void OnObjectLoaded(APIObjectCacheSingleton.CacheEntry obj, boolean authorizationErrors);
+        void OnObjectLoaded(APIObjectCacheSingleton.CacheEntry obj, ErrorType errorCode);
+    }
+
+    public enum ErrorType {
+        NO_ERROR,
+        AUTHORIZATION_FAILED,
+        NOT_FOUND,
+        UNKNOWN_ERROR,
+        MALFORMED_REQUEST,
+        PRECONDITION_FAILED
     }
 
     public static class PaginationInfo
@@ -47,7 +56,7 @@ public class APIObjectLoader {
     {
         if(className == null || className.isEmpty() || objectId == null || objectId.isEmpty())
         {
-            loader.OnObjectLoaded(null, false);
+            loader.OnObjectLoaded(null, ErrorType.MALFORMED_REQUEST);
 
             return;
         }
@@ -58,7 +67,7 @@ public class APIObjectLoader {
 
             if(object != null)
             {
-                loader.OnObjectLoaded(object, false);
+                loader.OnObjectLoaded(object, ErrorType.NO_ERROR);
 
                 return;
             }
@@ -80,20 +89,31 @@ public class APIObjectLoader {
 
                             APIObjectCacheSingleton.getInstance().AddObject(cacheKey, cacheEntry, expiresIn);
 
-                            loader.OnObjectLoaded(cacheEntry, false);
+                            loader.OnObjectLoaded(cacheEntry, ErrorType.NO_ERROR);
                             break;
                         case HttpURLConnection.HTTP_UNAUTHORIZED:
                             Toast.makeText(ctx, APIWrapper.GetErrorMessageFromResponse(ctx, response, statusCode), Toast.LENGTH_LONG).show();
 
-                            loader.OnObjectLoaded(null, true);
+                            loader.OnObjectLoaded(null, ErrorType.AUTHORIZATION_FAILED);
+                            break;
+                        case HttpURLConnection.HTTP_NOT_FOUND:
+                            loader.OnObjectLoaded(null, ErrorType.NOT_FOUND);
+                            break;
+                        case HttpURLConnection.HTTP_PRECON_FAILED:
+                            loader.OnObjectLoaded(null, ErrorType.PRECONDITION_FAILED);
                             break;
                         default:
                             Toast.makeText(ctx, APIWrapper.GetErrorMessageFromResponse(ctx, response, statusCode), Toast.LENGTH_LONG).show();
+
+                            loader.OnObjectLoaded(null, ErrorType.UNKNOWN_ERROR);
+                            break;
                     }
                 }
             });
         } catch (Exception e) {
             Toast.makeText(ctx, ctx.getString(R.string.unexpected_error), Toast.LENGTH_LONG).show();
+
+            loader.OnObjectLoaded(null, ErrorType.MALFORMED_REQUEST);
         }
     }
 }

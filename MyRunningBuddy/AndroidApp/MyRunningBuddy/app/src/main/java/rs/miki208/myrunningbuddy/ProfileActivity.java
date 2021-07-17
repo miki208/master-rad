@@ -1,11 +1,16 @@
 package rs.miki208.myrunningbuddy;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,29 +39,32 @@ public class ProfileActivity extends AppCompatActivity {
         }
 
         profileDataWidgets = new HashMap<>();
-        profileDataWidgets.put("name", (TextView) findViewById(R.id.tvName));
-        profileDataWidgets.put("location", (TextView) findViewById(R.id.tvLocation));
-        profileDataWidgets.put("aboutme", (TextView) findViewById(R.id.tvAboutme));
-        profileDataWidgets.put("avg_total_distance_per_week", (TextView) findViewById(R.id.tvAvgTotalDistancePerWeek));
-        profileDataWidgets.put("avg_moving_time_per_week", (TextView) findViewById(R.id.tvAvgMovingTimePerWeek));
-        profileDataWidgets.put("avg_longest_distance_per_week", (TextView) findViewById(R.id.tvAvgLongestDistancePerWeek));
-        profileDataWidgets.put("avg_pace_per_week", (TextView) findViewById(R.id.tvAvgPacePerWeek));
-        profileDataWidgets.put("avg_total_elevation_per_week", (TextView) findViewById(R.id.tvAvgTotalElevationPerWeek));
-        profileDataWidgets.put("avg_start_time_per_week", (TextView) findViewById(R.id.tvAvgStartTimePerWeek));
+        ActivityHelper.FillProfileDataWidgets(this, profileDataWidgets);
+
+        profileDataWidgets.get("name").setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ProfileActivity.this, MatchingActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        Context thisActivity = this;
         APIObjectLoader.LoadData(getApplicationContext(), "user", userId, true, 10 * 60, new APIObjectLoader.PaginationInfo(), new APIObjectLoader.APIObjectListener() {
             @Override
-            public void OnObjectLoaded(APIObjectCacheSingleton.CacheEntry obj, boolean authorizationErrors) {
-                if(authorizationErrors)
+            public void OnObjectLoaded(APIObjectCacheSingleton.CacheEntry obj, APIObjectLoader.ErrorType errorCode) {
+                if(errorCode == APIObjectLoader.ErrorType.AUTHORIZATION_FAILED)
                 {
-                    Intent intent = new Intent(thisActivity, LoginActivity.class);
-                    thisActivity.startActivity(intent);
+                    Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
+                    ProfileActivity.this.startActivity(intent);
+
+                    ProfileActivity.this.finish();
+
+                    return;
                 }
 
                 if(obj == null)
@@ -67,8 +75,15 @@ public class ProfileActivity extends AppCompatActivity {
 
                 JSONObject user = (JSONObject) obj.cachedObject;
 
-                ActivityHelper.RenderProfile(thisActivity, profileDataWidgets, user);
+                ActivityHelper.RenderProfile(ProfileActivity.this, profileDataWidgets, user);
             }
         });
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+
+        savedInstanceState.putString("user_id", userId);
     }
 }

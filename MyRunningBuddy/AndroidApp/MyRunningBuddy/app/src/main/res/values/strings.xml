@@ -27,4 +27,12 @@
     <string name="about_me">about me</string>
     <string name="runner_stats">runner stats</string>
     <string name="unauthorized">Unauthorized</string>
+    <string name="profile_image">profile image</string>
+    <string name="profile_info_icon">profile info icon</string>
+    <string name="runner_stats_icon">runner stats icon</string>
+    <string name="didnt_fill_required_fields">You didn\'t fill all required fields</string>
+    <string name="accept">accept</string>
+    <string name="reject">reject</string>
+    <string name="no_matches_available">There are no more matches available right now. Please try again later.</string>
+    <string name="to_start_matching_connect_external_account">In order to start matching, please connect to one of the external accounts and record at least one run.</string>
 </resources>

@@ -54,7 +54,7 @@ public class RegistrationActivity extends AppCompatActivity {
 
         Context thisActivity = this;
 
-        APIWrapper.RegisterUser(getApplicationContext(), email, password, name, surname, location, aboutme, new AbstractAPIResponseHandler() {
+        boolean success = APIWrapper.RegisterUser(getApplicationContext(), email, password, name, surname, location, aboutme, new AbstractAPIResponseHandler() {
             @Override
             public void Handle(JSONObject response, int statusCode) throws JSONException {
                 switch (statusCode)
@@ -87,6 +87,9 @@ public class RegistrationActivity extends AppCompatActivity {
                 btnSignUp.setEnabled(true);
             }
         });
+
+        if(!success)
+            btnSignUp.setEnabled(true);
     }
 
     public void onSignInClick(View view)

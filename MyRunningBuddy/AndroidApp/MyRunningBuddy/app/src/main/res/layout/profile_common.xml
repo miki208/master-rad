@@ -1,0 +1,232 @@
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/constraintLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto" >
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorBackgroundLayer"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/ivProfilePhoto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="40dp"
+            android:layout_marginTop="40dp"
+            android:layout_marginEnd="40dp"
+            android:layout_marginBottom="16dp"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/profile_image"
+            android:maxWidth="50dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/no_profile_image" />
+
+        <TextView
+            android:id="@+id/tvName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:text=""
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvLocation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:gravity="center"
+            android:text=""
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/ivProfileInfoIcon"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/profile_info_icon"
+        android:src="@drawable/information_icon"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
+
+    <TextView
+        android:id="@+id/tvAbout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/about_me"
+        android:textAllCaps="true"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/ivProfileInfoIcon"
+        app:layout_constraintTop_toTopOf="@id/ivProfileInfoIcon" />
+
+    <TextView
+        android:id="@+id/tvAboutme"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@+id/tvAbout"
+        app:layout_constraintStart_toStartOf="@+id/tvAbout"
+        app:layout_constraintTop_toBottomOf="@id/tvAbout" />
+
+    <ImageView
+        android:id="@+id/ivRunnerStatsIcon"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:adjustViewBounds="true"
+        android:src="@drawable/runner_stats"
+        android:contentDescription="@string/runner_stats_icon"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvAboutme" />
+
+    <TextView
+        android:id="@+id/tvRunnerStats"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/runner_stats"
+        android:textAllCaps="true"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/tvAbout"
+        app:layout_constraintStart_toStartOf="@+id/tvAbout"
+        app:layout_constraintTop_toTopOf="@id/ivRunnerStatsIcon" />
+
+    <TextView
+        android:id="@+id/tvAvgTotalDistancePerWeek"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@+id/tvAbout"
+        app:layout_constraintStart_toStartOf="@+id/tvAbout"
+        app:layout_constraintTop_toBottomOf="@id/tvRunnerStats" />
+
+    <View
+        android:id="@+id/view1"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/colorBackgroundLayer"
+        app:layout_constraintEnd_toEndOf="@+id/tvAbout"
+        app:layout_constraintStart_toStartOf="@+id/tvAbout"
+        app:layout_constraintTop_toBottomOf="@id/tvAvgTotalDistancePerWeek" />
+
+    <TextView
+        android:id="@+id/tvAvgMovingTimePerWeek"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text=""
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@+id/tvAbout"
+        app:layout_constraintStart_toStartOf="@+id/tvAbout"
+        app:layout_constraintTop_toBottomOf="@id/view1" />
+
+    <View
+        android:id="@+id/view2"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/colorBackgroundLayer"
+        app:layout_constraintEnd_toEndOf="@+id/tvAbout"
+        app:layout_constraintStart_toStartOf="@+id/tvAbout"
+        app:layout_constraintTop_toBottomOf="@id/tvAvgMovingTimePerWeek" />
+
+    <TextView
+        android:id="@+id/tvAvgLongestDistancePerWeek"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text=""
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@+id/tvAbout"
+        app:layout_constraintStart_toStartOf="@+id/tvAbout"
+        app:layout_constraintTop_toBottomOf="@id/view2" />
+
+    <View
+        android:id="@+id/view3"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/colorBackgroundLayer"
+        app:layout_constraintEnd_toEndOf="@+id/tvAbout"
+        app:layout_constraintStart_toStartOf="@+id/tvAbout"
+        app:layout_constraintTop_toBottomOf="@id/tvAvgLongestDistancePerWeek" />
+
+    <TextView
+        android:id="@+id/tvAvgPacePerWeek"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text=""
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@+id/tvAbout"
+        app:layout_constraintStart_toStartOf="@+id/tvAbout"
+        app:layout_constraintTop_toBottomOf="@id/view3" />
+
+    <View
+        android:id="@+id/view4"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/colorBackgroundLayer"
+        app:layout_constraintEnd_toEndOf="@+id/tvAbout"
+        app:layout_constraintStart_toStartOf="@+id/tvAbout"
+        app:layout_constraintTop_toBottomOf="@id/tvAvgPacePerWeek" />
+
+    <TextView
+        android:id="@+id/tvAvgTotalElevationPerWeek"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text=""
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@+id/tvAbout"
+        app:layout_constraintStart_toStartOf="@+id/tvAbout"
+        app:layout_constraintTop_toBottomOf="@id/view4" />
+
+    <View
+        android:id="@+id/view5"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/colorBackgroundLayer"
+        app:layout_constraintEnd_toEndOf="@+id/tvAbout"
+        app:layout_constraintStart_toStartOf="@+id/tvAbout"
+        app:layout_constraintTop_toBottomOf="@id/tvAvgTotalElevationPerWeek" />
+
+    <TextView
+        android:id="@+id/tvAvgStartTimePerWeek"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:text=""
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/tvAbout"
+        app:layout_constraintStart_toStartOf="@+id/tvAbout"
+        app:layout_constraintTop_toBottomOf="@id/view5" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
