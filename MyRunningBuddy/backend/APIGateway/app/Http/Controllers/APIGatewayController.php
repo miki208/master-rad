@@ -133,14 +133,16 @@ class APIGatewayController extends Controller
             return $response;
 
         // we'll extend response and append additional data about the matched user
-        $response = json_decode($response->content(), true);
-        $matched_id = $response['suggested_runner']['runner_id'];
+        $responseJson = json_decode($response->content(), true);
+        $matched_id = $responseJson['suggested_runner']['runner_id'];
 
         $userInfoResponse = $this->check_user_and_pass_to_another_service($request, 'get', $matched_id, "/runner/$matched_id", 'RunnerManagementService');
         if($userInfoResponse->status() === Response::HTTP_OK)
-            $response['suggested_runner']['info'] = json_decode($userInfoResponse->content(), true);
+            $responseJson['suggested_runner']['info'] = json_decode($userInfoResponse->content(), true);
+        else
+            return $userInfoResponse;
 
-        return response()->json($response, Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
+        return response()->json($responseJson, Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
     }
 
     public function match_action(Request $request, $runner_id, $suggested_runner)

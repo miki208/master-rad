@@ -24,10 +24,7 @@ class MessagingController extends Controller
         if($validator->fails())
             return ResponseHelper::GenerateValidatorErrorMessage($validator->errors());
 
-        if(Conversation::conversationExists($input['runner_id1'], $input['runner_id2']))
-            return ResponseHelper::GenerateSimpleTextResponse('Conversation already exists.', Response::HTTP_BAD_REQUEST);
-
-        $conversation = Conversation::create($input);
+        $conversation = Conversation::updateOrCreate($input, []);
 
         return response()->json($conversation, Response::HTTP_CREATED, [], JSON_UNESCAPED_SLASHES);
     }

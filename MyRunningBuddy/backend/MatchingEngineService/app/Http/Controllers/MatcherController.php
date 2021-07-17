@@ -43,7 +43,7 @@ class MatcherController extends Controller
             return ResponseHelper::GenerateSimpleTextResponse('Unauthorized.', Response::HTTP_UNAUTHORIZED);
 
         // data validation
-        $params = $request->only(['runner_id', 'priority_field']);
+        $params = $request->only(['priority_field']);
 
         $validator = Validator::make($params, [
             'priority_field' => 'sometimes|string|in:' . implode(',', array_keys(self::$available_fields))
@@ -58,7 +58,7 @@ class MatcherController extends Controller
         $thisRunnerStats = RunnerStats::get_runner_stats_by_runner_id($runner_id);
 
         if($thisRunnerStats === null or $thisRunnerLocation === null)
-            return ResponseHelper::GenerateSimpleTextResponse('This runner has no required data to make this match.', Response::HTTP_BAD_REQUEST);
+            return ResponseHelper::GenerateSimpleTextResponse("In order to start matching, please add one of the external accounts and record at least one running activity.", Response::HTTP_PRECONDITION_FAILED);
 
         // first check if there is an already suggested runner
         $potentialMatch = PotentialMatch::get_next_potential_match($runner_id);
