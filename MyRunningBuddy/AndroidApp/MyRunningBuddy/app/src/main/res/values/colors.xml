@@ -11,4 +11,5 @@
     <color name="editTextHintColor">#BDBDBD</color>
     <color name="rejectColor">#BA160C</color>
     <color name="acceptColor">#A4C639</color>
+    <color name="grey">#FF888888</color>
 </resources>

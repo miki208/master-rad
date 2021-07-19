@@ -1,6 +1,10 @@
 package rs.miki208.myrunningbuddy;
 
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -36,6 +40,8 @@ public class MatchingActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_matching);
+
+        ActivityHelper.InitializeToolbarAndMenu(this);
 
         profileDataWidgets = new HashMap<>();
         ActivityHelper.FillProfileDataWidgets(this, profileDataWidgets);
@@ -107,6 +113,15 @@ public class MatchingActivity extends AppCompatActivity {
         dialogOverlay.setVisibility(View.GONE);
 
         ShowNextMatch();
+    }
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if(drawer.isDrawerOpen(GravityCompat.START))
+            drawer.closeDrawer(GravityCompat.START);
+        else
+            super.onBackPressed();
     }
 
     private void ShowNextMatch()

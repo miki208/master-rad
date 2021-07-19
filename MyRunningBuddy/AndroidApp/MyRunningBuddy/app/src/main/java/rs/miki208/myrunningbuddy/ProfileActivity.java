@@ -1,18 +1,13 @@
 package rs.miki208.myrunningbuddy;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -31,6 +26,8 @@ public class ProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
+        ActivityHelper.InitializeToolbarAndMenu(this);
+
         userId = getIntent().getStringExtra("user_id");
         if(userId == null || userId.isEmpty())
         {
@@ -40,14 +37,6 @@ public class ProfileActivity extends AppCompatActivity {
 
         profileDataWidgets = new HashMap<>();
         ActivityHelper.FillProfileDataWidgets(this, profileDataWidgets);
-
-        profileDataWidgets.get("name").setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(ProfileActivity.this, MatchingActivity.class);
-                startActivity(intent);
-            }
-        });
     }
 
     @Override
@@ -85,5 +74,14 @@ public class ProfileActivity extends AppCompatActivity {
         super.onSaveInstanceState(savedInstanceState);
 
         savedInstanceState.putString("user_id", userId);
+    }
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        if(drawer.isDrawerOpen(GravityCompat.START))
+            drawer.closeDrawer(GravityCompat.START);
+        else
+            super.onBackPressed();
     }
 }

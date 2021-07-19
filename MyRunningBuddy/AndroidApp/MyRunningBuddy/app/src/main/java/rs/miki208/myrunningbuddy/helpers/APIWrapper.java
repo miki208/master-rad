@@ -18,6 +18,7 @@ import org.json.JSONObject;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -97,11 +98,38 @@ public class APIWrapper {
 
     private static boolean SendRequest(Context ctx, String method, String route, Map<String, String> headers, JSONObject requestData, AbstractAPIResponseHandler handler)
     {
-        String apiGatewayUrl = "http://" + GlobalVars.GetApiGatewayUrl() + route;
-
         DefaultResponseListener responseListener = new DefaultResponseListener(handler);
 
         int methodEnum = StringMethodToEnum(method);
+
+        // Volley doesn't support sending GET params as JSONObject
+        if(requestData != null && methodEnum == Request.Method.GET)
+        {
+            boolean first = true;
+
+            Iterator<String> keys = requestData.keys();
+
+            while(keys.hasNext())
+            {
+                String key = keys.next();
+
+                if(first)
+                {
+                    first = false;
+                    route += "?";
+                }
+
+                try {
+                    route += key + "=" + requestData.get(key);
+                } catch (JSONException ignored) {
+
+                }
+            }
+
+            requestData = null;
+        }
+
+        String apiGatewayUrl = "http://" + GlobalVars.GetApiGatewayUrl() + route;
 
         JsonObjectRequest request = new JsonObjectRequest(methodEnum, apiGatewayUrl, requestData, responseListener, responseListener) {
             @Override
@@ -367,5 +395,38 @@ public class APIWrapper {
         }
 
         return SendAuthorizedRequest(ctx, "POST", "/matcher/match/me/" + userId, requestData, handler);
+    }
+
+    public static boolean GetAuthorizationParams(Context ctx, String serviceName, AbstractAPIResponseHandler handler)
+    {
+        JSONObject requestData = new JSONObject();
+
+        try {
+            requestData.put("service_name", serviceName);
+
+            return SendAuthorizedRequest(ctx, "GET", "/user/me/external_service_authorization_params", requestData, handler);
+        } catch (JSONException e) {
+            return false;
+        }
+    }
+
+    public static boolean RevokeAuthorizationToExternalService(Context ctx, String serviceName, AbstractAPIResponseHandler handler)
+    {
+        return SendAuthorizedRequest(ctx, "DELETE", "/user/me/external_service/" + serviceName, null, handler);
+    }
+
+    public static boolean UpdateUser(Context ctx, String surname, String location, String aboutme, AbstractAPIResponseHandler handler)
+    {
+        JSONObject requestData = new JSONObject();
+
+        try {
+            requestData.put("surname", surname);
+            requestData.put("location", location);
+            requestData.put("aboutme", aboutme);
+
+            return SendAuthorizedRequest(ctx, "PATCH", "/user/me", requestData, handler);
+        } catch (JSONException e) {
+            return false;
+        }
     }
 }

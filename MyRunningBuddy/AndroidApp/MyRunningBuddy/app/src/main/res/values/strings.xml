@@ -35,4 +35,15 @@
     <string name="reject">reject</string>
     <string name="no_matches_available">There are no more matches available right now. Please try again later.</string>
     <string name="to_start_matching_connect_external_account">In order to start matching, please connect to one of the external accounts and record at least one run.</string>
+    <string name="my_profile">My profile</string>
+    <string name="find_a_runner">Find a runner</string>
+    <string name="update_profile">Update profile</string>
+    <string name="inbox">Inbox</string>
+    <string name="open_nav_drawer">Open navigation drawer</string>
+    <string name="close_nav_drawer">Close navigation drawer</string>
+    <string name="external_accounts">External accounts</string>
+    <string name="update_your_profile_info">Update your profile info</string>
+    <string name="profile_info">Profile info</string>
+    <string name="linked">Linked</string>
+    <string name="not_linked">Not linked</string>
 </resources>

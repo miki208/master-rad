@@ -1,9 +1,18 @@
 package rs.miki208.myrunningbuddy.helpers;
 
 import android.content.Context;
+import android.content.Intent;
+import android.view.MenuItem;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+
+import com.google.android.material.navigation.NavigationView;
 
 import org.json.JSONObject;
 
@@ -11,7 +20,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.TimeZone;
 
+import rs.miki208.myrunningbuddy.LoginActivity;
+import rs.miki208.myrunningbuddy.MatchingActivity;
+import rs.miki208.myrunningbuddy.ProfileActivity;
 import rs.miki208.myrunningbuddy.R;
+import rs.miki208.myrunningbuddy.UpdateProfileActivity;
 
 public class ActivityHelper {
     public static void FillProfileDataWidgets(AppCompatActivity activity, HashMap<String, TextView> profileDataWidgets)
@@ -154,5 +167,59 @@ public class ActivityHelper {
         ((TextView) profileDataWidgets.get("avg_pace_per_week")).setText("");
         ((TextView) profileDataWidgets.get("avg_total_elevation_per_week")).setText("");
         ((TextView) profileDataWidgets.get("avg_start_time_per_week")).setText("");
+    }
+
+    public static void InitializeToolbarAndMenu(AppCompatActivity activity)
+    {
+        Toolbar toolbar = (Toolbar) activity.findViewById(R.id.toolbar);
+        activity.setSupportActionBar(toolbar);
+
+        DrawerLayout drawer = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(activity, drawer, toolbar, R.string.open_nav_drawer, R.string.close_nav_drawer);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) activity.findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                Intent intent = null;
+
+                switch (item.getItemId())
+                {
+                    case R.id.nav_profile:
+                        intent = new Intent(activity, ProfileActivity.class);
+                        intent.putExtra("user_id", "me");
+                        break;
+                    case R.id.nav_find_runner:
+                        intent = new Intent(activity, MatchingActivity.class);
+                        break;
+                    case R.id.nav_update_profile:
+                        intent = new Intent(activity, UpdateProfileActivity.class);
+                    default:
+                        break;
+                }
+
+                if(intent != null)
+                    activity.startActivity(intent);
+
+                drawer.closeDrawer(GravityCompat.START);
+
+                return true;
+            }
+        });
+    }
+
+    public static void Logout(Context appCtx, AppCompatActivity activity)
+    {
+        SharedPrefSingleton.getInstance(appCtx).RemoveKey(appCtx.getString(R.string.API_ACCESS_TOKEN));
+        SharedPrefSingleton.getInstance(appCtx).RemoveKey(appCtx.getString(R.string.API_REFRESH_TOKEN));
+        SharedPrefSingleton.getInstance(appCtx).RemoveKey(appCtx.getString(R.string.API_EXPIRES_AT));
+
+        Intent intent = new Intent(activity, LoginActivity.class);
+
+        activity.startActivity(intent);
+
+        activity.finish();
     }
 }

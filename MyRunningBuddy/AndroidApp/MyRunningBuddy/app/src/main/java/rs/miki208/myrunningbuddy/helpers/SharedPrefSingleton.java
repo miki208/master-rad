@@ -55,4 +55,9 @@ public class SharedPrefSingleton {
 
         editor.apply();
     }
+
+    public void RemoveKey(String key)
+    {
+        sharedPref.edit().remove(key).apply();
+    }
 }
