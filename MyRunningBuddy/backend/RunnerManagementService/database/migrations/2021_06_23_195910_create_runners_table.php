@@ -19,6 +19,7 @@ class CreateRunnersTable extends Migration
             $table->string('surname', 30)->default('');
             $table->string('aboutme', 256)->default('');
             $table->string('preferences', 256)->default('');
+            $table->string('profile_photo_url')->default('');
             $table->timestamps();
         });
     }

@@ -88,6 +88,9 @@ class ExternalServiceAuthorizationController extends Controller
             if($runner->location == '' and isset($athlete['country']))
                 $runner->location = $athlete['country'];
 
+            if($runner->profile_photo_url == '' and isset($athlete['profile']))
+                $runner->profile_photo_url = $athlete['profile'];
+
             $runner->save();
         }
 

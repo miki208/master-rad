@@ -61,6 +61,25 @@ class MessagingController extends Controller
         if($conversation == null)
             return ResponseHelper::GenerateSimpleTextResponse('Conversation does not exist.', Response::HTTP_BAD_REQUEST);
 
+        // runner_id1 saw this conversation
+        $shouldUpdateLastMessageSeen = $page == 0;
+        if($runner_id1 == $conversation->runner_id1)
+        {
+            $conversation->runner_id1_seen_conversation = true;
+
+            if($shouldUpdateLastMessageSeen)
+                $conversation->runner_id1_seen_last_message = true;
+        }
+        else
+        {
+            $conversation->runner_id2_seen_conversation = true;
+
+            if($shouldUpdateLastMessageSeen)
+                $conversation->runner_id2_seen_last_message = true;
+        }
+        $conversation->save();
+
+        // get messages
         $messages = Message::getMessages($conversation->id, $page, $num_of_results_per_page, $from_id);
 
         return response()->json(['messages' => $messages], Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
@@ -84,6 +103,7 @@ class MessagingController extends Controller
         if($conversation == null)
             return ResponseHelper::GenerateSimpleTextResponse('Conversation does not exist.', Response::HTTP_BAD_REQUEST);
 
+        // create new message
         $message = new Message();
 
         $message->conversation_id = $conversation->id;
@@ -92,6 +112,15 @@ class MessagingController extends Controller
 
         $message->save();
 
+        // set 'unseen' last message for the runner 2
+        if($runner_id2 == $conversation->runner_id1)
+            $conversation->runner_id1_seen_last_message = false;
+        else
+            $conversation->runner_id2_seen_last_message = false;
+
+        $conversation->save();
+
+        // update the time when the last conversation is modified
         $conversation->touch();
 
         return ResponseHelper::GenerateSimpleTextResponse('Message created.', Response::HTTP_CREATED);
