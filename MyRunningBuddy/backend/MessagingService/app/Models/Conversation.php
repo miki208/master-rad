@@ -34,11 +34,16 @@ class Conversation extends Model
         return self::getConversation($runner_id1, $runner_id2) != null;
     }
 
-    public static function getConversations($runner_id1, $page, $num_of_results_per_page)
+    public static function getConversations($runner_id1, $page, $num_of_results_per_page, $conversations_newer_than, $conversations_older_than)
     {
-        return Conversation::where('runner_id1', $runner_id1)
-            ->orWhere('runner_id2', $runner_id1)
-            ->orderBy('updated_at', 'desc')
+        return Conversation::where('updated_at', '>', $conversations_newer_than)
+            ->where('updated_at', '<', $conversations_older_than)
+            ->where(
+                function($query) use ($runner_id1) {
+                    $query->where('runner_id1', $runner_id1)
+                        ->orWhere('runner_id2', $runner_id1);
+                }
+            )->orderBy('updated_at', 'desc')
             ->skip(($page - 1) * $num_of_results_per_page)
             ->take($num_of_results_per_page)
             ->get();

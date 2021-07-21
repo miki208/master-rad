@@ -170,7 +170,35 @@ class APIGatewayController extends Controller
     {
         $id = $this->preprocess_userid_if_needed($id);
 
-        return $this->check_user_and_pass_to_another_service($request, 'get', $id, "/messages/$id", 'MessagingService');
+        $response = $this->check_user_and_pass_to_another_service($request, 'get', $id, "/messages/$id", 'MessagingService');
+        if($response->status() !== Response::HTTP_OK)
+            return $response;
+
+        // we'll extend response and append additional data about users
+        $responseJson = json_decode($response->content(), true);
+
+        if(isset($responseJson['conversations']))
+        {
+            $numberOfConversations = count($responseJson['conversations']);
+            for($i = 0; $i < $numberOfConversations; $i++)
+            {
+                $runnerId = -1;
+                if($responseJson['conversations'][$i]['runner_id1'] == $id)
+                    $runnerId = $responseJson['conversations'][$i]['runner_id2'];
+                else
+                    $runnerId = $responseJson['conversations'][$i]['runner_id1'];
+
+                $runnerInfo = $this->check_user_and_pass_to_another_service($request, 'get', $id, "/runner/$runnerId", 'RunnerManagementService');
+                if($runnerInfo->status() != Response::HTTP_OK)
+                    return $runnerInfo;
+
+                $responseJson['conversations'][$i]['user_info'] = json_decode($runnerInfo->content(), true);
+            }
+
+            return response()->json($responseJson, Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
+        }
+
+        return $response;
     }
 
     public function get_conversation(Request $request, $id, $user_id2)
