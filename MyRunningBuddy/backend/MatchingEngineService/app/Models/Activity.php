@@ -27,7 +27,7 @@ class Activity extends Model
             if(!isset($activity['activity_id']) or !isset($activity['start_date']) or !isset($activity['start_latlng']) or !isset($activity['end_latlng']))
                 continue;
 
-            if(Activity::where('activity_id', $activity['activity_id'])->count() > 0)
+            if(Activity::where('activity_id', $activity['activity_id'])->where('runner_id', $runner_id)->count() > 0)
                 continue;
 
             $activityModel = new Activity();
