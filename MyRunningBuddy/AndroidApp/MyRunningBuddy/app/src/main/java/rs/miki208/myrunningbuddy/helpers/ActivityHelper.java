@@ -2,7 +2,9 @@ package rs.miki208.myrunningbuddy.helpers;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Pair;
 import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -12,6 +14,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.android.volley.toolbox.NetworkImageView;
 import com.google.android.material.navigation.NavigationView;
 
 import org.json.JSONObject;
@@ -20,6 +23,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.TimeZone;
 
+import rs.miki208.myrunningbuddy.InboxActivity;
 import rs.miki208.myrunningbuddy.LoginActivity;
 import rs.miki208.myrunningbuddy.MatchingActivity;
 import rs.miki208.myrunningbuddy.ProfileActivity;
@@ -40,10 +44,18 @@ public class ActivityHelper {
         profileDataWidgets.put("avg_start_time_per_week", (TextView) activity.findViewById(R.id.tvAvgStartTimePerWeek));
     }
 
-    public static void RenderProfile(Context activity, HashMap<String, TextView> profileDataWidgets, JSONObject user)
+    public static void RenderProfile(AppCompatActivity activity, HashMap<String, TextView> profileDataWidgets, JSONObject user)
     {
         try
         {
+            String profilePhotoUrl = null;
+            if(user.has("profile_photo_url") && !user.isNull("profile_photo_url"))
+                profilePhotoUrl = user.getString("profile_photo_url");
+
+            ImageView ivProfilePhoto = activity.findViewById(R.id.ivProfilePhoto);
+            if(profilePhotoUrl != null && !profilePhotoUrl.equals(""))
+                new DownloadImageTask(ivProfilePhoto, profilePhotoUrl).execute();
+
             String name = null;
             if(user.has("name"))
                 name = user.getString("name");
@@ -72,12 +84,12 @@ public class ActivityHelper {
 
             ((TextView) profileDataWidgets.get("aboutme")).setText(location);
 
-            String avgTotalDistancePerWeek = "Avg. total distance per week: ";
-            String avgMovingTimePerWeek = "Avg. moving time per week: ";
-            String avgLongestDistancePerWeek = "Avg. longest distance per week: ";
-            String avgPacePerWeek = "Avg. pace per week: ";
-            String avgTotalElevationPerWeek = "Avg. total elevation per week: ";
-            String avgStartTimePerWeek = "Avg. start time per week: ";
+            String avgTotalDistancePerWeek = activity.getString(R.string.avg_total_distance_per_week) + ": ";
+            String avgMovingTimePerWeek = activity.getString(R.string.avg_moving_time_per_week) + ": ";
+            String avgLongestDistancePerWeek = activity.getString(R.string.avg_longest_distance_per_week) + ": ";
+            String avgPacePerWeek = activity.getString(R.string.avg_pace_per_week) + ": ";
+            String avgTotalElevationPerWeek = activity.getString(R.string.avg_total_elevation_per_week) + ": ";
+            String avgStartTimePerWeek = activity.getString(R.string.avg_start_time_per_week) + ": ";
 
             if(user.has("stats") && !user.isNull("stats"))
             {
@@ -155,7 +167,7 @@ public class ActivityHelper {
         }
     }
 
-    public static void RenderClearProfile(Context activity, HashMap<String, TextView> profileDataWidgets)
+    public static void RenderClearProfile(AppCompatActivity activity, HashMap<String, TextView> profileDataWidgets)
     {
         ((TextView) profileDataWidgets.get("name")).setText("");
         ((TextView) profileDataWidgets.get("aboutme")).setText("");
@@ -167,6 +179,8 @@ public class ActivityHelper {
         ((TextView) profileDataWidgets.get("avg_pace_per_week")).setText("");
         ((TextView) profileDataWidgets.get("avg_total_elevation_per_week")).setText("");
         ((TextView) profileDataWidgets.get("avg_start_time_per_week")).setText("");
+
+        ((ImageView) activity.findViewById(R.id.ivProfilePhoto)).setImageResource(R.drawable.no_profile_image);
     }
 
     public static void InitializeToolbarAndMenu(AppCompatActivity activity)
@@ -196,6 +210,10 @@ public class ActivityHelper {
                         break;
                     case R.id.nav_update_profile:
                         intent = new Intent(activity, UpdateProfileActivity.class);
+                        break;
+                    case R.id.nav_inbox:
+                        intent = new Intent(activity, InboxActivity.class);
+                        break;
                     default:
                         break;
                 }

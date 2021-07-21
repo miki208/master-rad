@@ -1,5 +1,7 @@
 package rs.miki208.myrunningbuddy.helpers;
 
+import java.util.TimeZone;
+
 public class CommonHelpers {
     static long GetCurrentTimestamp()
     {

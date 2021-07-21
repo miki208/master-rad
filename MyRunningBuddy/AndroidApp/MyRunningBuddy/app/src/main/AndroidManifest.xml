@@ -14,7 +14,12 @@
         android:theme="@style/Theme.MyRunningBuddy"
         android:usesCleartextTraffic="true"
         tools:targetApi="m">
-        <activity android:name=".UpdateProfileActivity"
+        <activity
+            android:name=".InboxActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".UpdateProfileActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
