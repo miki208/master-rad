@@ -65,7 +65,7 @@ class MessagingController extends Controller
             return ResponseHelper::GenerateSimpleTextResponse('Conversation does not exist.', Response::HTTP_BAD_REQUEST);
 
         // runner_id1 saw this conversation
-        $shouldUpdateLastMessageSeen = $page == 0;
+        $shouldUpdateLastMessageSeen = $page == 1;
         $somethingChanged = false;
         if($runner_id1 == $conversation->runner_id1)
         {
