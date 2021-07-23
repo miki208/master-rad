@@ -83,8 +83,8 @@ public class MatchingActivity extends AppCompatActivity {
                                     }
                                     else if(status.equals("matched"))
                                     {
-                                        Toast.makeText(getApplicationContext(), status, Toast.LENGTH_LONG).show();
-                                        // redirect to messages
+                                        Intent intent = new Intent(MatchingActivity.this, InboxActivity.class);
+                                        MatchingActivity.this.startActivity(intent);
                                     }
                                     break;
                                 case HttpURLConnection.HTTP_UNAUTHORIZED:
@@ -130,7 +130,7 @@ public class MatchingActivity extends AppCompatActivity {
         acceptButton.setEnabled(false);
         rejectButton.setEnabled(false);
 
-        APIObjectLoader.LoadData(getApplicationContext(), "nextMatch", "me", false, 0, new APIObjectLoader.PaginationInfo(), new APIObjectLoader.APIObjectListener() {
+        APIObjectLoader.LoadData(getApplicationContext(), "nextMatch", "me", false, 0, null, new APIObjectLoader.APIObjectListener() {
             @Override
             public void OnObjectLoaded(APIObjectCacheSingleton.CacheEntry obj, APIObjectLoader.ErrorType errorCode) {
                 if(errorCode == APIObjectLoader.ErrorType.AUTHORIZATION_FAILED)
@@ -213,7 +213,7 @@ public class MatchingActivity extends AppCompatActivity {
 
             JSONObject runnerInfo = suggestedRunner.getJSONObject("info");
 
-            String [] runnerInfoFields = new String[]{ "name", "surname", "aboutme", "location" };
+            String [] runnerInfoFields = new String[]{ "name", "surname", "aboutme", "location", "profile_photo_url"};
             for(String field : runnerInfoFields) {
                 if (runnerInfo.has(field) && !runnerInfo.isNull(field))
                     result.put(field, runnerInfo.getString(field));

@@ -9,7 +9,9 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,7 +20,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import rs.miki208.myrunningbuddy.helpers.APIObjectCacheSingleton;
 import rs.miki208.myrunningbuddy.helpers.APIObjectLoader;
@@ -26,6 +31,7 @@ import rs.miki208.myrunningbuddy.helpers.APIWrapper;
 import rs.miki208.myrunningbuddy.helpers.AbstractAPIResponseHandler;
 import rs.miki208.myrunningbuddy.helpers.ActivityHelper;
 import rs.miki208.myrunningbuddy.helpers.GlobalVars;
+import rs.miki208.myrunningbuddy.helpers.SharedPrefSingleton;
 
 public class UpdateProfileActivity extends AppCompatActivity {
     private HashMap<String, Boolean> linkedServices = new HashMap<>();
@@ -34,6 +40,10 @@ public class UpdateProfileActivity extends AppCompatActivity {
     EditText etSurname;
     EditText etLocation;
     EditText etAboutMe;
+    Spinner priorityField;
+
+    private List<String> priorityFieldsSelection;
+    private List<String> priorityFieldsNames;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +54,31 @@ public class UpdateProfileActivity extends AppCompatActivity {
         etSurname = findViewById(R.id.etSurname);
         etLocation = findViewById(R.id.etLocation);
         etAboutMe = findViewById(R.id.etAboutMe);
+        priorityField = findViewById(R.id.priorityField);
+
+        priorityFieldsSelection = new ArrayList<>(Arrays.asList(
+                getString(R.string.none),
+                getString(R.string.avg_total_distance_per_week),
+                getString(R.string.avg_moving_time_per_week),
+                getString(R.string.avg_longest_distance_per_week),
+                getString(R.string.avg_pace_per_week),
+                getString(R.string.avg_total_elevation_per_week),
+                getString(R.string.avg_start_time_per_week)
+        ));
+
+        priorityFieldsNames = new ArrayList<>(Arrays.asList(
+                "none",
+                "avg_total_distance_per_week",
+                "avg_moving_time_per_week",
+                "avg_longest_distance_per_week",
+                "avg_pace_per_week",
+                "avg_total_elevation_per_week",
+                "avg_start_time_per_week"
+        ));
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.spinner_item, priorityFieldsSelection);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        priorityField.setAdapter(adapter);
 
         ActivityHelper.InitializeToolbarAndMenu(this);
     }
@@ -61,8 +96,21 @@ public class UpdateProfileActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
+        // set priority field
+        String priorityF = (String) SharedPrefSingleton.getInstance(getApplicationContext()).GetValue("string", "priority_field");
+        int selectIndex = -1;
+        if(priorityF != null)
+        {
+            selectIndex = priorityFieldsNames.indexOf(priorityF);
+        }
+
+        if(selectIndex == -1)
+            priorityField.setSelection(0);
+        else
+            priorityField.setSelection(selectIndex);
+
         // get fresh user representation
-        APIObjectLoader.LoadData(getApplicationContext(), "user", "me", false, 10 * 60, new APIObjectLoader.PaginationInfo(), new APIObjectLoader.APIObjectListener() {
+        APIObjectLoader.LoadData(getApplicationContext(), "user", "me", false, 10 * 60, null, new APIObjectLoader.APIObjectListener() {
             @Override
             public void OnObjectLoaded(APIObjectCacheSingleton.CacheEntry obj, APIObjectLoader.ErrorType errorCode) {
                 if(errorCode == APIObjectLoader.ErrorType.AUTHORIZATION_FAILED)
@@ -75,7 +123,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
                 if(obj == null)
                     return;
 
-                if(obj.objectType == APIObjectCacheSingleton.EntryType.JSONARRAY)
+                if(obj.objectType != APIObjectCacheSingleton.EntryType.JSONOBJECT)
                     return;
 
                 JSONObject user = (JSONObject) obj.cachedObject;
@@ -146,6 +194,12 @@ public class UpdateProfileActivity extends AppCompatActivity {
 
     public void UpdateProfile(View view)
     {
+        int selectedIndex = priorityField.getSelectedItemPosition();
+        if(selectedIndex != Spinner.INVALID_POSITION && selectedIndex != 0)
+            SharedPrefSingleton.getInstance(getApplicationContext()).SetValue("string", "priority_field", priorityFieldsNames.get(selectedIndex));
+        else
+            SharedPrefSingleton.getInstance(getApplicationContext()).RemoveKey("priority_field");
+
         String surname = etSurname.getText().toString();
         String location = etLocation.getText().toString();
         String aboutme = etAboutMe.getText().toString();
@@ -170,7 +224,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
     }
 
     private void RefreshUserAndRedirectToProfile() {
-        APIObjectLoader.LoadData(getApplicationContext(), "user", "me", false, 10 * 60, new APIObjectLoader.PaginationInfo(), new APIObjectLoader.APIObjectListener() {
+        APIObjectLoader.LoadData(getApplicationContext(), "user", "me", false, 10 * 60, null, new APIObjectLoader.APIObjectListener() {
             @Override
             public void OnObjectLoaded(APIObjectCacheSingleton.CacheEntry obj, APIObjectLoader.ErrorType errorCode) {
                 if(errorCode == APIObjectLoader.ErrorType.AUTHORIZATION_FAILED)
@@ -210,7 +264,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
         {
             // link external service
 
-            APIObjectLoader.LoadData(getApplicationContext(), "authorizationParams", service_name, false, 0, new APIObjectLoader.PaginationInfo(), new APIObjectLoader.APIObjectListener() {
+            APIObjectLoader.LoadData(getApplicationContext(), "authorizationParams", service_name, false, 0, null, new APIObjectLoader.APIObjectListener() {
                 @Override
                 public void OnObjectLoaded(APIObjectCacheSingleton.CacheEntry obj, APIObjectLoader.ErrorType errorCode) {
                     if(errorCode == APIObjectLoader.ErrorType.AUTHORIZATION_FAILED)

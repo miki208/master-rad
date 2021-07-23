@@ -46,4 +46,14 @@
     <string name="profile_info">Profile info</string>
     <string name="linked">Linked</string>
     <string name="not_linked">Not linked</string>
+    <string name="avg_total_distance_per_week">Avg. total distance per week</string>
+    <string name="avg_moving_time_per_week">Avg. moving time per week</string>
+    <string name="avg_longest_distance_per_week">Avg. longest distance per week</string>
+    <string name="avg_pace_per_week">Avg. pace per week</string>
+    <string name="avg_start_time_per_week">Avg. start time per week</string>
+    <string name="avg_total_elevation_per_week">Avg. total elevation per week</string>
+    <string name="matching_priority_field">Matching priority field</string>
+    <string name="none">none</string>
+    <string name="new_match">New match</string>
+    <string name="new_message">New message</string>
 </resources>

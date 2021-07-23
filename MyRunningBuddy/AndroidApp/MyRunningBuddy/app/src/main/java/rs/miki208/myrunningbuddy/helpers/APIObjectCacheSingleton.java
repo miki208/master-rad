@@ -10,7 +10,8 @@ import java.util.Map;
 public class APIObjectCacheSingleton {
     public enum EntryType {
         JSONOBJECT,
-        JSONARRAY
+        JSONARRAY,
+        IMAGE
     }
 
     public static class CacheEntry {

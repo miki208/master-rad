@@ -30,6 +30,8 @@ public class APIObjectLoader {
     {
         int pageNumber;
         int itemsPerPage;
+        String newerThan;
+        String olderThan;
 
         public PaginationInfo()
         {
@@ -37,10 +39,12 @@ public class APIObjectLoader {
             itemsPerPage = -1;
         }
 
-        public PaginationInfo(int pageNumber, int itemsPerPage)
+        public PaginationInfo(int pageNumber, int itemsPerPage, String newerThan, String olderThan)
         {
             this.pageNumber = pageNumber;
             this.itemsPerPage = itemsPerPage;
+            this.newerThan = newerThan;
+            this.olderThan = olderThan;
         }
 
         public boolean IsValid()
@@ -76,9 +80,13 @@ public class APIObjectLoader {
         try {
             String methodName = Character.toUpperCase(className.charAt(0)) + className.substring(1);
 
-            Method method = APIWrapper.class.getMethod("Get" + methodName, Context.class, String.class, AbstractAPIResponseHandler.class);
+            Method method = null;
+            if(paginationInfo == null)
+                method = APIWrapper.class.getMethod("Get" + methodName, Context.class, String.class, AbstractAPIResponseHandler.class);
+            else
+                method = APIWrapper.class.getMethod("Get" + methodName, Context.class, String.class, PaginationInfo.class, AbstractAPIResponseHandler.class);
 
-            method.invoke(null, ctx, objectId, new AbstractAPIResponseHandler() {
+            AbstractAPIResponseHandler handler = new AbstractAPIResponseHandler() {
                 @Override
                 public void Handle(JSONObject response, int statusCode) throws JSONException {
                     switch(statusCode)
@@ -109,7 +117,12 @@ public class APIObjectLoader {
                             break;
                     }
                 }
-            });
+            };
+
+            if(paginationInfo == null)
+                method.invoke(null, ctx, objectId, handler);
+            else
+                method.invoke(null, ctx, objectId, paginationInfo, handler);
         } catch (Exception e) {
             Toast.makeText(ctx, ctx.getString(R.string.unexpected_error), Toast.LENGTH_LONG).show();
 

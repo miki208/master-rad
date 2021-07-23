@@ -118,6 +118,10 @@ public class APIWrapper {
                     first = false;
                     route += "?";
                 }
+                else
+                {
+                    route += "&";
+                }
 
                 try {
                     route += key + "=" + requestData.get(key);
@@ -426,6 +430,27 @@ public class APIWrapper {
 
             return SendAuthorizedRequest(ctx, "PATCH", "/user/me", requestData, handler);
         } catch (JSONException e) {
+            return false;
+        }
+    }
+
+    public static boolean GetConversations(Context ctx, String userId, APIObjectLoader.PaginationInfo paginationInfo, AbstractAPIResponseHandler handler)
+    {
+        JSONObject requestData = new JSONObject();
+
+        try {
+            requestData.put("page", paginationInfo.pageNumber);
+            requestData.put("num_of_results_per_page", paginationInfo.itemsPerPage);
+
+            if(paginationInfo.newerThan != null)
+                requestData.put("conversations_newer_than", paginationInfo.newerThan);
+
+            if(paginationInfo.olderThan != null)
+                requestData.put("conversations_older_than", paginationInfo.olderThan);
+
+            return SendAuthorizedRequest(ctx, "GET", "/user/" + userId + "/messages", requestData, handler);
+        } catch (JSONException e)
+        {
             return false;
         }
     }

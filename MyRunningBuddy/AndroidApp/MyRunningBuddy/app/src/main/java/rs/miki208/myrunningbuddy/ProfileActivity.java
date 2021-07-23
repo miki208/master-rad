@@ -43,7 +43,7 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        APIObjectLoader.LoadData(getApplicationContext(), "user", userId, true, 10 * 60, new APIObjectLoader.PaginationInfo(), new APIObjectLoader.APIObjectListener() {
+        APIObjectLoader.LoadData(getApplicationContext(), "user", userId, true, 10 * 60, null, new APIObjectLoader.APIObjectListener() {
             @Override
             public void OnObjectLoaded(APIObjectCacheSingleton.CacheEntry obj, APIObjectLoader.ErrorType errorCode) {
                 if(errorCode == APIObjectLoader.ErrorType.AUTHORIZATION_FAILED)
@@ -59,7 +59,7 @@ public class ProfileActivity extends AppCompatActivity {
                 if(obj == null)
                     return;
 
-                if(obj.objectType == APIObjectCacheSingleton.EntryType.JSONARRAY)
+                if(obj.objectType != APIObjectCacheSingleton.EntryType.JSONOBJECT)
                     return;
 
                 JSONObject user = (JSONObject) obj.cachedObject;
