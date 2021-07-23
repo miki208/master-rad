@@ -99,8 +99,12 @@ class MessagingController extends Controller
                 $somethingChanged = true;
             }
         }
+
         if($somethingChanged)
+        {
+            $conversation->timestamps = false;
             $conversation->save();
+        }
 
         // get messages
         $messages = Message::getMessages($conversation->id, $page, $num_of_results_per_page, $messages_newer_than, $messages_older_than);
@@ -142,8 +146,6 @@ class MessagingController extends Controller
             $conversation->runner_id2_seen_last_message = false;
 
         $conversation->save();
-
-        // update the time when the last conversation is modified
         $conversation->touch();
 
         return ResponseHelper::GenerateSimpleTextResponse('Message created.', Response::HTTP_CREATED);
