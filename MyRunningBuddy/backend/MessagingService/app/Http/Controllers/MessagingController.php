@@ -54,7 +54,8 @@ class MessagingController extends Controller
 
         $page = $request->get('page', 1);
         $num_of_results_per_page = $request->get('num_of_results_per_page', 10);
-        $from_id = $request->get('from_id', 0);
+        $messages_newer_than = $request->get('messages_newer_than', '2000-01-01 00:00:00');
+        $messages_older_than = $request->get('messages_older_than', '9999-12-31 23:59:59');
 
         if($num_of_results_per_page > 50)
             $num_of_results_per_page = 50;
@@ -82,7 +83,7 @@ class MessagingController extends Controller
         $conversation->save();
 
         // get messages
-        $messages = Message::getMessages($conversation->id, $page, $num_of_results_per_page, $from_id);
+        $messages = Message::getMessages($conversation->id, $page, $num_of_results_per_page, $messages_newer_than, $messages_older_than);
 
         return response()->json(['messages' => $messages], Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
     }
