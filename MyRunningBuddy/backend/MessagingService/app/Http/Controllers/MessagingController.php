@@ -66,21 +66,41 @@ class MessagingController extends Controller
 
         // runner_id1 saw this conversation
         $shouldUpdateLastMessageSeen = $page == 0;
+        $somethingChanged = false;
         if($runner_id1 == $conversation->runner_id1)
         {
-            $conversation->runner_id1_seen_conversation = true;
+            if($conversation->runner_id1_seen_conversation == false)
+            {
+                $conversation->runner_id1_seen_conversation = true;
 
-            if($shouldUpdateLastMessageSeen)
+                $somethingChanged = true;
+            }
+
+            if($shouldUpdateLastMessageSeen and $conversation->runner_id1_seen_last_message == false)
+            {
                 $conversation->runner_id1_seen_last_message = true;
+
+                $somethingChanged = true;
+            }
         }
         else
         {
-            $conversation->runner_id2_seen_conversation = true;
+            if($conversation->runner_id2_seen_conversation == false)
+            {
+                $conversation->runner_id2_seen_conversation = true;
 
-            if($shouldUpdateLastMessageSeen)
+                $somethingChanged = true;
+            }
+
+            if($shouldUpdateLastMessageSeen and $conversation->runner_id2_seen_last_message == false)
+            {
                 $conversation->runner_id2_seen_last_message = true;
+
+                $somethingChanged = true;
+            }
         }
-        $conversation->save();
+        if($somethingChanged)
+            $conversation->save();
 
         // get messages
         $messages = Message::getMessages($conversation->id, $page, $num_of_results_per_page, $messages_newer_than, $messages_older_than);
