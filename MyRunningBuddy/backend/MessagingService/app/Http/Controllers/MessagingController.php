@@ -9,6 +9,7 @@ use App\Models\Message;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Validator;
+use Carbon\Carbon;
 
 class MessagingController extends Controller
 {
@@ -24,7 +25,7 @@ class MessagingController extends Controller
         if($validator->fails())
             return ResponseHelper::GenerateValidatorErrorMessage($validator->errors());
 
-        $conversation = Conversation::updateOrCreate($input, []);
+        $conversation = Conversation::updateOrCreate($input, ['last_change_at' => Carbon::now()]);
 
         return response()->json($conversation, Response::HTTP_CREATED, [], JSON_UNESCAPED_SLASHES);
     }
@@ -101,10 +102,7 @@ class MessagingController extends Controller
         }
 
         if($somethingChanged)
-        {
-            $conversation->timestamps = false;
             $conversation->save();
-        }
 
         // get messages
         $messages = Message::getMessages($conversation->id, $page, $num_of_results_per_page, $messages_newer_than, $messages_older_than);
@@ -145,8 +143,9 @@ class MessagingController extends Controller
         else
             $conversation->runner_id2_seen_last_message = false;
 
+        $conversation->last_change_at = Carbon::now();
+
         $conversation->save();
-        $conversation->touch();
 
         return ResponseHelper::GenerateSimpleTextResponse('Message created.', Response::HTTP_CREATED);
     }
