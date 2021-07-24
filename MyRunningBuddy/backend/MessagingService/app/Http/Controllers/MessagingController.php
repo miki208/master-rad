@@ -9,6 +9,7 @@ use App\Models\Message;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Validator;
+use Carbon\Carbon;
 
 class MessagingController extends Controller
 {
@@ -24,7 +25,7 @@ class MessagingController extends Controller
         if($validator->fails())
             return ResponseHelper::GenerateValidatorErrorMessage($validator->errors());
 
-        $conversation = Conversation::updateOrCreate($input, []);
+        $conversation = Conversation::updateOrCreate($input, ['last_change_at' => Carbon::now()]);
 
         return response()->json($conversation, Response::HTTP_CREATED, [], JSON_UNESCAPED_SLASHES);
     }
@@ -54,7 +55,8 @@ class MessagingController extends Controller
 
         $page = $request->get('page', 1);
         $num_of_results_per_page = $request->get('num_of_results_per_page', 10);
-        $from_id = $request->get('from_id', 0);
+        $messages_newer_than = $request->get('messages_newer_than', '2000-01-01 00:00:00');
+        $messages_older_than = $request->get('messages_older_than', '9999-12-31 23:59:59');
 
         if($num_of_results_per_page > 50)
             $num_of_results_per_page = 50;
@@ -64,25 +66,46 @@ class MessagingController extends Controller
             return ResponseHelper::GenerateSimpleTextResponse('Conversation does not exist.', Response::HTTP_BAD_REQUEST);
 
         // runner_id1 saw this conversation
-        $shouldUpdateLastMessageSeen = $page == 0;
+        $shouldUpdateLastMessageSeen = $page == 1;
+        $somethingChanged = false;
         if($runner_id1 == $conversation->runner_id1)
         {
-            $conversation->runner_id1_seen_conversation = true;
+            if($conversation->runner_id1_seen_conversation == false)
+            {
+                $conversation->runner_id1_seen_conversation = true;
 
-            if($shouldUpdateLastMessageSeen)
+                $somethingChanged = true;
+            }
+
+            if($shouldUpdateLastMessageSeen and $conversation->runner_id1_seen_last_message == false)
+            {
                 $conversation->runner_id1_seen_last_message = true;
+
+                $somethingChanged = true;
+            }
         }
         else
         {
-            $conversation->runner_id2_seen_conversation = true;
+            if($conversation->runner_id2_seen_conversation == false)
+            {
+                $conversation->runner_id2_seen_conversation = true;
 
-            if($shouldUpdateLastMessageSeen)
+                $somethingChanged = true;
+            }
+
+            if($shouldUpdateLastMessageSeen and $conversation->runner_id2_seen_last_message == false)
+            {
                 $conversation->runner_id2_seen_last_message = true;
+
+                $somethingChanged = true;
+            }
         }
-        $conversation->save();
+
+        if($somethingChanged)
+            $conversation->save();
 
         // get messages
-        $messages = Message::getMessages($conversation->id, $page, $num_of_results_per_page, $from_id);
+        $messages = Message::getMessages($conversation->id, $page, $num_of_results_per_page, $messages_newer_than, $messages_older_than);
 
         return response()->json(['messages' => $messages], Response::HTTP_OK, [], JSON_UNESCAPED_SLASHES);
     }
@@ -120,10 +143,9 @@ class MessagingController extends Controller
         else
             $conversation->runner_id2_seen_last_message = false;
 
-        $conversation->save();
+        $conversation->last_change_at = Carbon::now();
 
-        // update the time when the last conversation is modified
-        $conversation->touch();
+        $conversation->save();
 
         return ResponseHelper::GenerateSimpleTextResponse('Message created.', Response::HTTP_CREATED);
     }

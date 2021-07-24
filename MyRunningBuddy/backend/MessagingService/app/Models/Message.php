@@ -15,11 +15,12 @@ class Message extends Model
 
     protected $hidden = [];
 
-    public static function getMessages($conversationId, $page, $num_of_results_per_page, $from_id)
+    public static function getMessages($conversationId, $page, $num_of_results_per_page, $messages_newer_than, $messages_older_than)
     {
-        return Message::where('conversation_id', $conversationId)
-            ->where('id', '>', $from_id)
-            ->orderBy('id', 'desc')
+        return Message::where('updated_at', '>', $messages_newer_than)
+            ->where('updated_at', '<', $messages_older_than)
+            ->where('conversation_id', $conversationId)
+            ->orderBy('updated_at', 'desc')
             ->skip(($page - 1) * $num_of_results_per_page)
             ->take($num_of_results_per_page)
             ->get();
