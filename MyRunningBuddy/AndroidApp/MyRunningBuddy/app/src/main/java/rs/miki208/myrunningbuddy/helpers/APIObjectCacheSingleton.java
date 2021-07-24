@@ -134,6 +134,13 @@ public class APIObjectCacheSingleton {
         objectCacheMap.put(key, entry);
     }
 
+    public void RemoveAll()
+    {
+        numberOfInserts = 0;
+
+        objectCacheMap.clear();
+    }
+
     private static APIObjectCacheSingleton instance;
 
     HashMap<CacheKey, CacheEntry> objectCacheMap = new HashMap<>();
