@@ -12,4 +12,6 @@
     <color name="rejectColor">#BA160C</color>
     <color name="acceptColor">#A4C639</color>
     <color name="grey">#FF888888</color>
+    <color name="right_message_color">#EF944D</color>
+    <color name="left_message_color">#AAC7C9CA</color>
 </resources>

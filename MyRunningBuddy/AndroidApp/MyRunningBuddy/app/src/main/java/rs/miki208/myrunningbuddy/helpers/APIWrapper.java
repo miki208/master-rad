@@ -1,6 +1,7 @@
 package rs.miki208.myrunningbuddy.helpers;
 
 import android.content.Context;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -453,5 +454,39 @@ public class APIWrapper {
         {
             return false;
         }
+    }
+
+    public static boolean GetMessages(Context ctx, String userId, APIObjectLoader.PaginationInfo paginationInfo, AbstractAPIResponseHandler handler)
+    {
+        JSONObject requestData = new JSONObject();
+
+        try {
+            requestData.put("page", paginationInfo.pageNumber);
+            requestData.put("num_of_results_per_page", paginationInfo.itemsPerPage);
+
+            if(paginationInfo.newerThan != null)
+                requestData.put("messages_newer_than", paginationInfo.newerThan);
+
+            if(paginationInfo.olderThan != null)
+                requestData.put("messages_older_than", paginationInfo.olderThan);
+
+            return SendAuthorizedRequest(ctx, "GET", "/user/me/messages/" + userId, requestData, handler);
+        } catch (JSONException e)
+        {
+            return false;
+        }
+    }
+
+    public static boolean SendMessage(Context ctx, String userId, String message, AbstractAPIResponseHandler handler)
+    {
+        JSONObject requestData = new JSONObject();
+
+        try {
+            requestData.put("message", message);
+        } catch (JSONException e) {
+            return false;
+        }
+
+        return SendAuthorizedRequest(ctx, "POST", "/user/me/messages/" + userId, requestData, handler);
     }
 }

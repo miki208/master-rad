@@ -3,13 +3,18 @@ package rs.miki208.myrunningbuddy;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -19,9 +24,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import rs.miki208.myrunningbuddy.helpers.APIObjectCacheSingleton;
@@ -41,6 +43,8 @@ public class InboxActivity extends AppCompatActivity {
         public boolean newConversation;
         public boolean newMessage;
 
+        boolean loadMoreItem;
+
         public Conversation()
         {
             name = "";
@@ -51,6 +55,8 @@ public class InboxActivity extends AppCompatActivity {
 
             newConversation = false;
             newMessage = false;
+
+            loadMoreItem = false;
         }
     }
 
@@ -67,6 +73,44 @@ public class InboxActivity extends AppCompatActivity {
             this.context = context;
         }
 
+        private void SetLoadMore(View view, boolean visible)
+        {
+            TextView tvLoadMore = view.findViewById(R.id.tvLoadMore);
+            if(tvLoadMore != null) {
+                if(visible)
+                    tvLoadMore.setVisibility(View.VISIBLE);
+                else
+                    tvLoadMore.setVisibility(View.GONE);
+            }
+        }
+
+        private void SetConversationView(View view, boolean visible)
+        {
+            ImageView ivProfilePhoto = view.findViewById(R.id.ivProfilePhoto);
+            if(ivProfilePhoto != null) {
+                if (visible)
+                    ivProfilePhoto.setVisibility(View.VISIBLE);
+                else
+                    ivProfilePhoto.setVisibility(View.INVISIBLE);
+            }
+
+            TextView tvName = view.findViewById(R.id.tvName);
+            if(tvName != null) {
+                if (visible)
+                    tvName.setVisibility(View.VISIBLE);
+                else
+                    tvName.setVisibility(View.INVISIBLE);
+            }
+
+            TextView tvConversationStatus = view.findViewById(R.id.tvConversationStatus);
+            if(tvConversationStatus != null) {
+                if (visible)
+                    tvConversationStatus.setVisibility(View.VISIBLE);
+                else
+                    tvConversationStatus.setVisibility(View.INVISIBLE);
+            }
+        }
+
         @NonNull
         @Override
         public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
@@ -79,36 +123,47 @@ public class InboxActivity extends AppCompatActivity {
             }
 
             Conversation elem = getItem(position);
-            if(elem != null)
-            {
-                TextView tvName = view.findViewById(R.id.tvName);
-                if(tvName != null)
-                    tvName.setText(elem.name);
+            if(elem != null) {
+                if (elem.loadMoreItem) {
+                    SetLoadMore(view, true);
+                    SetConversationView(view, false);
+                } else {
+                    SetLoadMore(view, false);
+                    SetConversationView(view, true);
 
-                ImageView ivProfilePhoto = view.findViewById(R.id.ivProfilePhoto);
-                if(ivProfilePhoto != null && !elem.profileImageUrl.equals(""))
-                    new DownloadImageTask(ivProfilePhoto, elem.profileImageUrl).execute();
+                    // set name
+                    TextView tvName = view.findViewById(R.id.tvName);
+                    if (tvName != null)
+                        tvName.setText(elem.name);
 
-                TextView tvConversationStatus = view.findViewById(R.id.tvConversationStatus);
-                if(tvConversationStatus != null)
-                {
-                    String status = "";
-                    if(elem.newConversation)
-                        status += getString(R.string.new_match);
-                    else if(elem.newMessage)
-                        status += getString(R.string.new_message);
+                    // set photo
+                    ImageView ivProfilePhoto = view.findViewById(R.id.ivProfilePhoto);
+                    if (ivProfilePhoto != null && !elem.profileImageUrl.equals(""))
+                        new DownloadImageTask(ivProfilePhoto, elem.profileImageUrl).execute();
 
-                    if(!status.equals(""))
-                    {
-                        tvConversationStatus.setTextColor(getResources().getColor(R.color.rejectColor));
-                        status += "\n";
+                    // set conversation status (conversation status + date)
+                    TextView tvConversationStatus = view.findViewById(R.id.tvConversationStatus);
+                    if (tvConversationStatus != null) {
+                        String status = "";
+
+                        // add status if the conversation is a new one, or if there is an unseen message
+                        if (elem.newConversation)
+                            status += getString(R.string.new_match);
+                        else if (elem.newMessage)
+                            status += getString(R.string.new_message);
+
+                        // if there isn't a special status, color of the status message is black, otherwise red
+                        if (!status.equals("")) {
+                            tvConversationStatus.setTextColor(getResources().getColor(R.color.rejectColor));
+                            status += "\n";
+                        } else
+                            tvConversationStatus.setTextColor(getResources().getColor(R.color.black));
+
+                        // add date (it should be local time zone)
+                        status += elem.datetime;
+
+                        tvConversationStatus.setText(status);
                     }
-                    else
-                        tvConversationStatus.setTextColor(getResources().getColor(R.color.black));
-
-                    status += elem.datetime;
-
-                    tvConversationStatus.setText(status);
                 }
             }
 
@@ -119,31 +174,79 @@ public class InboxActivity extends AppCompatActivity {
     final static int numOfConversationsPerPage = 10;
 
     ArrayList<Conversation> conversations;
-
     ArrayAdapter conversationsAdapter;
+    Handler refreshConversationHandler;
 
-    Handler refreshMessageHandler;
+    boolean activityInPauseState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_inbox);
 
+        ActivityHelper.InitializeToolbarAndMenu(this);
+
         conversations = new ArrayList<>();
+
+        // add "load more" item at the bottom
+        Conversation loadMoreItem = new Conversation();
+        loadMoreItem.loadMoreItem = true;
+        conversations.add(loadMoreItem);
 
         conversationsAdapter = new ConversationAdapter(this,
                 R.layout.conversations_listview, conversations);
 
         ListView listView = findViewById(R.id.lvConversations);
         listView.setAdapter(conversationsAdapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                int numOfConversations = conversations.size();
 
-        refreshMessageHandler = new Handler();
-        refreshMessageHandler.post(new Runnable() {
+                Conversation conversation = conversations.get(position);
+                if(conversation.loadMoreItem)
+                {
+                    String olderThan = null;
+                    if(numOfConversations > 1)
+                        olderThan = conversations.get(numOfConversations - 2).datetime;
+
+                    ReloadConversations(null, olderThan, null);
+                }
+                else
+                {
+                    Intent intent = new Intent(InboxActivity.this, ChatActivity.class);
+                    intent.putExtra("user_id", conversation.userId);
+                    intent.putExtra("name", conversation.name);
+
+                    InboxActivity.this.startActivity(intent);
+                }
+            }
+        });
+
+        refreshConversationHandler = new Handler();
+    }
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if(drawer.isDrawerOpen(GravityCompat.START))
+            drawer.closeDrawer(GravityCompat.START);
+        else
+            super.onBackPressed();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        activityInPauseState = false;
+
+        refreshConversationHandler.post(new Runnable() {
             @Override
             public void run() {
                 String newerThan = null;
-                if(!conversations.isEmpty())
-                    newerThan = conversations.get(0).datetime;
+                if(conversations.size() > 1)
+                    newerThan = conversations.get(1).datetime;
 
                 ReloadConversations(newerThan, null, this);
             }
@@ -151,14 +254,12 @@ public class InboxActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-    }
+    protected void onPause() {
+        super.onPause();
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        refreshMessageHandler.removeCallbacksAndMessages(null);
+        activityInPauseState = true;
+
+        refreshConversationHandler.removeCallbacksAndMessages(null);
     }
 
     private void ReloadConversations(String newerThanDt, String olderThanDt, Runnable context)
@@ -221,10 +322,10 @@ public class InboxActivity extends AppCompatActivity {
                                 conversation.profileImageUrl = userInfo.getString("profile_photo_url");
                         }
 
-                        if(!conversationJson.has("updated_at") || conversationJson.isNull("updated_at"))
+                        if(!conversationJson.has("last_change_at") || conversationJson.isNull("last_change_at"))
                             continue;
 
-                        conversation.datetime = conversationJson.getString("updated_at").split("\\.")[0];
+                        conversation.datetime = conversationJson.getString("last_change_at").split("\\.")[0];
 
                         if(conversation.userId == conversationJson.getInt("runner_id1"))
                         {
@@ -238,7 +339,7 @@ public class InboxActivity extends AppCompatActivity {
                         }
 
                         // remove existing conversations
-                        int numOfExistingConversations = conversations.size();
+                        int numOfExistingConversations = conversations.size() - 1;
                         for(int j = 0; j < numOfExistingConversations; j++)
                         {
                             if(conversations.get(j).userId == conversation.userId)
@@ -259,13 +360,13 @@ public class InboxActivity extends AppCompatActivity {
                 if(newerThanDt != null)
                     conversations.addAll(0, newConversations);
                 else
-                    conversations.addAll(newConversations);
+                    conversations.addAll(conversations.size() - 1, newConversations);
 
                 conversationsAdapter.notifyDataSetChanged();
 
-                // schedule refreshing only if it's newerThan mode
-                if(olderThanDt == null)
-                    refreshMessageHandler.postDelayed(context,5000);
+                // schedule refreshing only if it's "newer than" mode
+                if(olderThanDt == null && context != null && !activityInPauseState)
+                    refreshConversationHandler.postDelayed(context,5000);
             }
         });
     }
