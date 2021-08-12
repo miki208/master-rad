@@ -480,10 +480,10 @@ Docker сервиси омогућавају контејнерима да се 
 }
 \begin{lstlisting}
 def PronadjiPartnera(idTrkaca):
-    postojeciRezultat = PostojeciRezultati(idTrkaca)
+    postojeciRezultati = PostojeciRezultati(idTrkaca)
 
-    if postojeciRezultat != None:
-        return postojeciRezultat
+    if postojeciRezultati != None:
+        return postojeciRezultati[0]
 
     trkaciURadijusu = NTrkacaURadijusu(userId, N, RADIJUS)
     if trkaciURadijusu == None:
