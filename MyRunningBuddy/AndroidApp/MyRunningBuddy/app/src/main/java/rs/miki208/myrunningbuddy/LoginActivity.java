@@ -15,6 +15,7 @@ import org.json.JSONObject;
 
 import java.net.HttpURLConnection;
 
+import rs.miki208.myrunningbuddy.helpers.APIObjectCacheSingleton;
 import rs.miki208.myrunningbuddy.helpers.APIWrapper;
 import rs.miki208.myrunningbuddy.helpers.AbstractAPIResponseHandler;
 
@@ -31,6 +32,13 @@ public class LoginActivity extends AppCompatActivity {
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
         btnSignIn = findViewById(R.id.btnSignIn);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        
+        APIObjectCacheSingleton.getInstance().RemoveAll();
     }
 
     public void onSignUpClick(View view)

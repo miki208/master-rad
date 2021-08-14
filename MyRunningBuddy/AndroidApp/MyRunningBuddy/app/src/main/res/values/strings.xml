@@ -56,4 +56,8 @@
     <string name="none">none</string>
     <string name="new_match">New match</string>
     <string name="new_message">New message</string>
+    <string name="load_more">load more</string>
+    <string name="send">send</string>
+    <string name="send_message_to">Send message to</string>
+    <string name="logout">Logout</string>
 </resources>

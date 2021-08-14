@@ -214,6 +214,9 @@ public class ActivityHelper {
                     case R.id.nav_inbox:
                         intent = new Intent(activity, InboxActivity.class);
                         break;
+                    case R.id.nav_logout:
+                        Logout(activity.getApplicationContext(), activity);
+                        return true;
                     default:
                         break;
                 }
