@@ -6,6 +6,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TextView;
 
 import org.json.JSONObject;
@@ -28,20 +29,27 @@ public class ProfileActivity extends AppCompatActivity {
 
         ActivityHelper.InitializeToolbarAndMenu(this);
 
-        userId = getIntent().getStringExtra("user_id");
-        if(userId == null || userId.isEmpty())
-        {
-            if(savedInstanceState != null)
-                userId = savedInstanceState.getString("user_id");
-        }
+        if(savedInstanceState != null)
+            userId = savedInstanceState.getString("user_id");
 
         profileDataWidgets = new HashMap<>();
         ActivityHelper.FillProfileDataWidgets(this, profileDataWidgets);
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        setIntent(intent);
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
+
+        String userIdIntent = getIntent().getStringExtra("user_id");
+        if(userIdIntent != null && !userIdIntent.isEmpty())
+            userId = userIdIntent;
 
         APIObjectLoader.LoadData(getApplicationContext(), "user", userId, true, 10 * 60, null, new APIObjectLoader.APIObjectListener() {
             @Override

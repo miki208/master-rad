@@ -489,4 +489,9 @@ public class APIWrapper {
 
         return SendAuthorizedRequest(ctx, "POST", "/user/me/messages/" + userId, requestData, handler);
     }
+
+    public static boolean RevokeAccessToken(Context ctx, AbstractAPIResponseHandler handler)
+    {
+        return SendAuthorizedRequest(ctx, "DELETE", "/oauth/token", null, handler);
+    }
 }

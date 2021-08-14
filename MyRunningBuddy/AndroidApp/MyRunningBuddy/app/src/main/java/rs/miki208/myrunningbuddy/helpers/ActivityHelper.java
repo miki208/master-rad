@@ -17,6 +17,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import com.android.volley.toolbox.NetworkImageView;
 import com.google.android.material.navigation.NavigationView;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Date;
@@ -215,7 +216,7 @@ public class ActivityHelper {
                         intent = new Intent(activity, InboxActivity.class);
                         break;
                     case R.id.nav_logout:
-                        Logout(activity.getApplicationContext(), activity);
+                        LogoutAndRevokeAccessToken(activity.getApplicationContext(), activity);
                         return true;
                     default:
                         break;
@@ -242,5 +243,15 @@ public class ActivityHelper {
         activity.startActivity(intent);
 
         activity.finish();
+    }
+
+    public static void LogoutAndRevokeAccessToken(Context appCtx, AppCompatActivity activity)
+    {
+        APIWrapper.RevokeAccessToken(appCtx, new AbstractAPIResponseHandler() {
+            @Override
+            public void Handle(JSONObject response, int statusCode) throws JSONException {
+                Logout(appCtx, activity);
+            }
+        });
     }
 }

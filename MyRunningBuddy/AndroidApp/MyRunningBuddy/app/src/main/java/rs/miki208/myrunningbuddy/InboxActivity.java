@@ -222,6 +222,23 @@ public class InboxActivity extends AppCompatActivity {
                 }
             }
         });
+        listView.setLongClickable(true);
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                Conversation conversation = conversations.get(position);
+
+                if(conversation.loadMoreItem)
+                    return true;
+
+                Intent intent = new Intent(InboxActivity.this, ProfileActivity.class);
+                intent.putExtra("user_id", String.valueOf(conversation.userId));
+
+                InboxActivity.this.startActivity(intent);
+
+                return true;
+            }
+        });
 
         refreshConversationHandler = new Handler();
     }
