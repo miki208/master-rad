@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Http\Request;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -32,9 +33,13 @@ class AuthServiceProvider extends ServiceProvider
 
         $this->app->router->group(['prefix' => 'oauth', 'namespace' => '\Laravel\Passport\Http\Controllers'], function() {
             $routeRegistrar = new \Dusterio\LumenPassport\RouteRegistrar($this->app->router);
-        
+
             $routeRegistrar->forAccessTokens();
             $routeRegistrar->forTransientTokens();
+
+            $this->app->router->delete('/token', ['middleware' => 'auth', function(Request $request) {
+                $request->user()->token()->revoke();
+            }]);
         });
     }
 }
