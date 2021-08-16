@@ -2,7 +2,6 @@ package rs.miki208.myrunningbuddy.helpers;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Pair;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -14,13 +13,11 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import com.android.volley.toolbox.NetworkImageView;
 import com.google.android.material.navigation.NavigationView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.TimeZone;
 
@@ -30,6 +27,9 @@ import rs.miki208.myrunningbuddy.MatchingActivity;
 import rs.miki208.myrunningbuddy.ProfileActivity;
 import rs.miki208.myrunningbuddy.R;
 import rs.miki208.myrunningbuddy.UpdateProfileActivity;
+import rs.miki208.myrunningbuddy.networking.DownloadImageTask;
+import rs.miki208.myrunningbuddy.networking.api.APIWrapper;
+import rs.miki208.myrunningbuddy.networking.api.AbstractAPIResponseHandler;
 
 public class ActivityHelper {
     public static void FillProfileDataWidgets(AppCompatActivity activity, HashMap<String, TextView> profileDataWidgets)
