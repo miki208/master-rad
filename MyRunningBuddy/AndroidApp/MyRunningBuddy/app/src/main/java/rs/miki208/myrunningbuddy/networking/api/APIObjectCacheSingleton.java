@@ -1,4 +1,4 @@
-package rs.miki208.myrunningbuddy.helpers;
+package rs.miki208.myrunningbuddy.networking.api;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -7,7 +7,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import rs.miki208.myrunningbuddy.common.CommonHelpers;
+
+/***
+ * Used for caching different objects
+ */
 public class APIObjectCacheSingleton {
+    // currently available entry types
     public enum EntryType {
         JSONOBJECT,
         JSONARRAY,
@@ -79,6 +85,7 @@ public class APIObjectCacheSingleton {
 
         CacheEntry entry = objectCacheMap.get(key);
 
+        //--- do not return a cached object if it's expired
         if(entry == null || entry.expiresAt < now)
             return null;
 
@@ -118,9 +125,9 @@ public class APIObjectCacheSingleton {
 
         entry.expiresAt = expiresAt;
 
+        //--- at every 100. insert, clear expired items
         if(numberOfInserts == 100)
         {
-            //clear expired items
             for(Iterator<Map.Entry<CacheKey, CacheEntry>> it = objectCacheMap.entrySet().iterator(); it.hasNext();)
             {
                 Map.Entry<CacheKey, CacheEntry> elem = it.next();

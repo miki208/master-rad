@@ -1,4 +1,4 @@
-package rs.miki208.myrunningbuddy.helpers;
+package rs.miki208.myrunningbuddy.common;
 
 public class GlobalVars {
     private static String apiGatewayUrl = "hwsrv-894054.hostwindsdns.com:8002";

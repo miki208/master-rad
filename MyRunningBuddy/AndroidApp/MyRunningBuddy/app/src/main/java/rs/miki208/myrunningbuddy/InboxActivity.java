@@ -10,7 +10,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,10 +25,10 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-import rs.miki208.myrunningbuddy.helpers.APIObjectCacheSingleton;
-import rs.miki208.myrunningbuddy.helpers.APIObjectLoader;
-import rs.miki208.myrunningbuddy.helpers.ActivityHelper;
-import rs.miki208.myrunningbuddy.helpers.DownloadImageTask;
+import rs.miki208.myrunningbuddy.networking.api.APIObjectCacheSingleton;
+import rs.miki208.myrunningbuddy.networking.api.APIObjectLoader;
+import rs.miki208.myrunningbuddy.common.ActivityHelper;
+import rs.miki208.myrunningbuddy.networking.DownloadImageTask;
 
 public class InboxActivity extends AppCompatActivity {
     public class Conversation

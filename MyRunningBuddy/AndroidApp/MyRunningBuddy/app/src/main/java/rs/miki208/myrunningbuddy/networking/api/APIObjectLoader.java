@@ -1,4 +1,4 @@
-package rs.miki208.myrunningbuddy.helpers;
+package rs.miki208.myrunningbuddy.networking.api;
 
 import android.content.Context;
 import android.widget.Toast;
@@ -11,7 +11,12 @@ import java.net.HttpURLConnection;
 
 import rs.miki208.myrunningbuddy.R;
 
+/***
+ * Used for loading API object representations + it incorporates caching
+ */
 public class APIObjectLoader {
+    // If you're using APIObjectLoader, you'll have to inherit this class to define what happens
+    // when an object representation is loaded
     public interface APIObjectListener
     {
         void OnObjectLoaded(APIObjectCacheSingleton.CacheEntry obj, ErrorType errorCode);
@@ -56,8 +61,11 @@ public class APIObjectLoader {
         }
     }
 
+    // this is the main method for loading object representations
+    // it accepts an object class name, unique id of an object, caching and pagination options as well as APIObjectLoader
     public static void LoadData(Context ctx, String className, String objectId, boolean useCache, long expiresIn, PaginationInfo paginationInfo, APIObjectListener loader)
     {
+        //--- this request isn't valid because class name of the object is not valid or unique id is not present
         if(className == null || className.isEmpty() || objectId == null || objectId.isEmpty())
         {
             loader.OnObjectLoaded(null, ErrorType.MALFORMED_REQUEST);
@@ -65,6 +73,7 @@ public class APIObjectLoader {
             return;
         }
 
+        //--- if caching is enabled, check if the object is already stored within the cache
         if(useCache) {
             APIObjectCacheSingleton.CacheKey cacheKey = new APIObjectCacheSingleton.CacheKey(className, objectId);
             APIObjectCacheSingleton.CacheEntry object = APIObjectCacheSingleton.getInstance().GetObject(cacheKey);
@@ -78,6 +87,7 @@ public class APIObjectLoader {
         }
 
         try {
+            //--- use Java reflection to find appropriate API method wrapper
             String methodName = Character.toUpperCase(className.charAt(0)) + className.substring(1);
 
             Method method = null;
@@ -119,6 +129,7 @@ public class APIObjectLoader {
                 }
             };
 
+            //--- invoke the API wrapper
             if(paginationInfo == null)
                 method.invoke(null, ctx, objectId, handler);
             else

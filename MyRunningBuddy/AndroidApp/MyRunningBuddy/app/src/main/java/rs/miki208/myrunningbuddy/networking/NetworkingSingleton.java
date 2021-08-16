@@ -1,4 +1,4 @@
-package rs.miki208.myrunningbuddy.helpers;
+package rs.miki208.myrunningbuddy.networking;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -9,6 +9,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.Volley;
 
+// Singleton wrapper for Volley's request queue
 public class NetworkingSingleton {
     private static NetworkingSingleton instance;
     private static Context context;

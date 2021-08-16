@@ -15,9 +15,9 @@ import org.json.JSONObject;
 
 import java.net.HttpURLConnection;
 
-import rs.miki208.myrunningbuddy.helpers.APIObjectCacheSingleton;
-import rs.miki208.myrunningbuddy.helpers.APIWrapper;
-import rs.miki208.myrunningbuddy.helpers.AbstractAPIResponseHandler;
+import rs.miki208.myrunningbuddy.networking.api.APIObjectCacheSingleton;
+import rs.miki208.myrunningbuddy.networking.api.APIWrapper;
+import rs.miki208.myrunningbuddy.networking.api.AbstractAPIResponseHandler;
 
 public class LoginActivity extends AppCompatActivity {
     EditText etEmail;

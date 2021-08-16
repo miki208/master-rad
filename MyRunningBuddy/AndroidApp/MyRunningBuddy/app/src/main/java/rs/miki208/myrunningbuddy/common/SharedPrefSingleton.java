@@ -1,9 +1,10 @@
-package rs.miki208.myrunningbuddy.helpers;
+package rs.miki208.myrunningbuddy.common;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+// Singleton wrapper around SharedPref subsystem
 public class SharedPrefSingleton {
     private static SharedPrefSingleton instance;
 
