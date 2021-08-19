@@ -25,13 +25,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import rs.miki208.myrunningbuddy.helpers.APIObjectCacheSingleton;
-import rs.miki208.myrunningbuddy.helpers.APIObjectLoader;
-import rs.miki208.myrunningbuddy.helpers.APIWrapper;
-import rs.miki208.myrunningbuddy.helpers.AbstractAPIResponseHandler;
-import rs.miki208.myrunningbuddy.helpers.ActivityHelper;
-import rs.miki208.myrunningbuddy.helpers.GlobalVars;
-import rs.miki208.myrunningbuddy.helpers.SharedPrefSingleton;
+import rs.miki208.myrunningbuddy.networking.api.APIObjectCacheSingleton;
+import rs.miki208.myrunningbuddy.networking.api.APIObjectLoader;
+import rs.miki208.myrunningbuddy.networking.api.APIWrapper;
+import rs.miki208.myrunningbuddy.networking.api.AbstractAPIResponseHandler;
+import rs.miki208.myrunningbuddy.common.ActivityHelper;
+import rs.miki208.myrunningbuddy.common.GlobalVars;
+import rs.miki208.myrunningbuddy.common.SharedPrefSingleton;
 
 public class UpdateProfileActivity extends AppCompatActivity {
     private HashMap<String, Boolean> linkedServices = new HashMap<>();

@@ -1,8 +1,6 @@
 package rs.miki208.myrunningbuddy;
 
-import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -20,11 +18,11 @@ import org.json.JSONObject;
 import java.net.HttpURLConnection;
 import java.util.HashMap;
 
-import rs.miki208.myrunningbuddy.helpers.APIObjectCacheSingleton;
-import rs.miki208.myrunningbuddy.helpers.APIObjectLoader;
-import rs.miki208.myrunningbuddy.helpers.APIWrapper;
-import rs.miki208.myrunningbuddy.helpers.AbstractAPIResponseHandler;
-import rs.miki208.myrunningbuddy.helpers.ActivityHelper;
+import rs.miki208.myrunningbuddy.networking.api.APIObjectCacheSingleton;
+import rs.miki208.myrunningbuddy.networking.api.APIObjectLoader;
+import rs.miki208.myrunningbuddy.networking.api.APIWrapper;
+import rs.miki208.myrunningbuddy.networking.api.AbstractAPIResponseHandler;
+import rs.miki208.myrunningbuddy.common.ActivityHelper;
 
 public class MatchingActivity extends AppCompatActivity {
     String suggestedRunnerId = null;

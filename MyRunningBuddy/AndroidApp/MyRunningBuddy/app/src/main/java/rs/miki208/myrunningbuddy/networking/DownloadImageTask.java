@@ -1,12 +1,13 @@
-package rs.miki208.myrunningbuddy.helpers;
+package rs.miki208.myrunningbuddy.networking;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.util.Log;
 import android.widget.ImageView;
 
 import java.io.InputStream;
+
+import rs.miki208.myrunningbuddy.networking.api.APIObjectCacheSingleton;
 
 public class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
     ImageView imageView;
@@ -18,6 +19,7 @@ public class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
         this.cacheImage = null;
         this.imageUrl = imageUrl;
 
+        //--- check if image is already cached
         APIObjectCacheSingleton.CacheKey key = new APIObjectCacheSingleton.CacheKey("img", imageUrl);
         APIObjectCacheSingleton.CacheEntry entry = APIObjectCacheSingleton.getInstance().GetObject(key);
 
@@ -26,9 +28,11 @@ public class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
     }
 
     protected Bitmap doInBackground(String... ignore) {
+        //--- there is no need to download image again if it's already in the cache
         if(cacheImage != null)
             return cacheImage;
 
+        //--- download image
         Bitmap img = null;
 
         try {
@@ -45,6 +49,7 @@ public class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
         if(result != null)
             imageView.setImageBitmap(result);
 
+        //--- put the newly downloaded image to the cache
         if(cacheImage == null)
         {
             APIObjectCacheSingleton.CacheKey key = new APIObjectCacheSingleton.CacheKey("img", imageUrl);

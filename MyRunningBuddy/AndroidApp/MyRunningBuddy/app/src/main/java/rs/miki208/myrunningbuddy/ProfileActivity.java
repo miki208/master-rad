@@ -6,16 +6,15 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.TextView;
 
 import org.json.JSONObject;
 
 import java.util.HashMap;
 
-import rs.miki208.myrunningbuddy.helpers.APIObjectCacheSingleton;
-import rs.miki208.myrunningbuddy.helpers.APIObjectLoader;
-import rs.miki208.myrunningbuddy.helpers.ActivityHelper;
+import rs.miki208.myrunningbuddy.networking.api.APIObjectCacheSingleton;
+import rs.miki208.myrunningbuddy.networking.api.APIObjectLoader;
+import rs.miki208.myrunningbuddy.common.ActivityHelper;
 
 public class ProfileActivity extends AppCompatActivity {
     String userId;

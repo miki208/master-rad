@@ -1,8 +1,7 @@
-package rs.miki208.myrunningbuddy.helpers;
+package rs.miki208.myrunningbuddy.common;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Pair;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -14,13 +13,11 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import com.android.volley.toolbox.NetworkImageView;
 import com.google.android.material.navigation.NavigationView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.TimeZone;
 
@@ -30,8 +27,17 @@ import rs.miki208.myrunningbuddy.MatchingActivity;
 import rs.miki208.myrunningbuddy.ProfileActivity;
 import rs.miki208.myrunningbuddy.R;
 import rs.miki208.myrunningbuddy.UpdateProfileActivity;
+import rs.miki208.myrunningbuddy.networking.DownloadImageTask;
+import rs.miki208.myrunningbuddy.networking.api.APIWrapper;
+import rs.miki208.myrunningbuddy.networking.api.AbstractAPIResponseHandler;
 
+
+/***
+ * Contains activity specific helper functions
+ */
 public class ActivityHelper {
+
+    // Fills map: field name -> profile layout text view components
     public static void FillProfileDataWidgets(AppCompatActivity activity, HashMap<String, TextView> profileDataWidgets)
     {
         profileDataWidgets.put("name", (TextView) activity.findViewById(R.id.tvName));
@@ -45,10 +51,12 @@ public class ActivityHelper {
         profileDataWidgets.put("avg_start_time_per_week", (TextView) activity.findViewById(R.id.tvAvgStartTimePerWeek));
     }
 
+    // Parse user API representation and fill corresponding Android components in user profile layout
     public static void RenderProfile(AppCompatActivity activity, HashMap<String, TextView> profileDataWidgets, JSONObject user)
     {
         try
         {
+            //--- parse profile photo url, and download image if available
             String profilePhotoUrl = null;
             if(user.has("profile_photo_url") && !user.isNull("profile_photo_url"))
                 profilePhotoUrl = user.getString("profile_photo_url");
@@ -57,6 +65,7 @@ public class ActivityHelper {
             if(profilePhotoUrl != null && !profilePhotoUrl.equals(""))
                 new DownloadImageTask(ivProfilePhoto, profilePhotoUrl).execute();
 
+            //--- set name and surname
             String name = null;
             if(user.has("name"))
                 name = user.getString("name");
@@ -73,18 +82,21 @@ public class ActivityHelper {
                 ((TextView) profileDataWidgets.get("name")).setText(name);
             }
 
+            //--- set location
             String location = "";
             if(user.has("location") && !user.isNull("location") && !user.getString("location").equals(""))
                 location = "@ " + user.getString("location");
 
             ((TextView) profileDataWidgets.get("location")).setText(location);
 
+            // set user description
             String aboutMe = "";
             if(user.has("aboutme") && !user.isNull("aboutme"))
                 location = user.getString("aboutme");
 
             ((TextView) profileDataWidgets.get("aboutme")).setText(location);
 
+            //--- parse running stats and fill the corresponding text views
             String avgTotalDistancePerWeek = activity.getString(R.string.avg_total_distance_per_week) + ": ";
             String avgMovingTimePerWeek = activity.getString(R.string.avg_moving_time_per_week) + ": ";
             String avgLongestDistancePerWeek = activity.getString(R.string.avg_longest_distance_per_week) + ": ";
@@ -164,10 +176,10 @@ public class ActivityHelper {
         }
         catch(Exception ignore)
         {
-            ignore.printStackTrace();;
         }
     }
 
+    // clear Android components from profile layout
     public static void RenderClearProfile(AppCompatActivity activity, HashMap<String, TextView> profileDataWidgets)
     {
         ((TextView) profileDataWidgets.get("name")).setText("");
@@ -184,6 +196,7 @@ public class ActivityHelper {
         ((ImageView) activity.findViewById(R.id.ivProfilePhoto)).setImageResource(R.drawable.no_profile_image);
     }
 
+    // initialize toolbar, menu and onItemSelected handler
     public static void InitializeToolbarAndMenu(AppCompatActivity activity)
     {
         Toolbar toolbar = (Toolbar) activity.findViewById(R.id.toolbar);
@@ -232,6 +245,7 @@ public class ActivityHelper {
         });
     }
 
+    // clear user session from device and redirect user to login activity
     public static void Logout(Context appCtx, AppCompatActivity activity)
     {
         SharedPrefSingleton.getInstance(appCtx).RemoveKey(appCtx.getString(R.string.API_ACCESS_TOKEN));
@@ -245,6 +259,7 @@ public class ActivityHelper {
         activity.finish();
     }
 
+    // the same as Logout, but also revokes access token
     public static void LogoutAndRevokeAccessToken(Context appCtx, AppCompatActivity activity)
     {
         APIWrapper.RevokeAccessToken(appCtx, new AbstractAPIResponseHandler() {

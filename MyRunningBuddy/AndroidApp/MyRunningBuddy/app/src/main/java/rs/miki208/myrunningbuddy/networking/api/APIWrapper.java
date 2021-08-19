@@ -1,22 +1,18 @@
-package rs.miki208.myrunningbuddy.helpers;
+package rs.miki208.myrunningbuddy.networking.api;
 
 import android.content.Context;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
-import com.android.volley.ServerError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.JsonRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -25,9 +21,14 @@ import java.util.Map;
 import javax.net.ssl.HttpsURLConnection;
 
 import rs.miki208.myrunningbuddy.R;
+import rs.miki208.myrunningbuddy.common.CommonHelpers;
+import rs.miki208.myrunningbuddy.common.GlobalVars;
+import rs.miki208.myrunningbuddy.common.SharedPrefSingleton;
+import rs.miki208.myrunningbuddy.networking.NetworkingSingleton;
 
+// Contains wrappers for My Running Buddy server side API procedures as well as helper methods and classes
 public class APIWrapper {
-    // helpers
+    // Listener for volley regular and error responses which delegates the response to the AbstractAPIResponseHandler
     private static class DefaultResponseListener implements Response.Listener<JSONObject>, Response.ErrorListener
     {
         private AbstractAPIResponseHandler handler = null;
@@ -52,6 +53,7 @@ public class APIWrapper {
             {
                 if(error instanceof AuthFailureError)
                 {
+                    //--- authentication errors should be treated as a regular response
                     JSONObject response = new JSONObject();
                     response.put("message", "Unauthorized");
 
@@ -59,6 +61,7 @@ public class APIWrapper {
                 }
                 else
                 {
+                    // extract as much info as possible from the error response (status code + response)
                     JSONObject response;
                     int statusCode = -1;
 
@@ -97,13 +100,15 @@ public class APIWrapper {
         }
     }
 
+    // Sends an async HTTP request with given method, route and params
     private static boolean SendRequest(Context ctx, String method, String route, Map<String, String> headers, JSONObject requestData, AbstractAPIResponseHandler handler)
     {
         DefaultResponseListener responseListener = new DefaultResponseListener(handler);
 
         int methodEnum = StringMethodToEnum(method);
 
-        // Volley doesn't support sending GET params as JSONObject
+        //--- Volley doesn't support sending GET params as JSONObject
+        //--- We'll append params to the url
         if(requestData != null && methodEnum == Request.Method.GET)
         {
             boolean first = true;
@@ -136,6 +141,7 @@ public class APIWrapper {
 
         String apiGatewayUrl = "http://" + GlobalVars.GetApiGatewayUrl() + route;
 
+        //--- add headers to the request
         JsonObjectRequest request = new JsonObjectRequest(methodEnum, apiGatewayUrl, requestData, responseListener, responseListener) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
@@ -146,11 +152,13 @@ public class APIWrapper {
             }
         };
 
+        //--- add the request to the volley request queue
         NetworkingSingleton.getInstance(ctx).addToRequestQueue(request);
 
         return true;
     }
 
+    // Helper for getting the human readable error message based on response and status code
     public static String GetErrorMessageFromResponse(Context ctx, JSONObject response, int statusCode)
     {
         if(response == null || !response.has("message"))
@@ -171,6 +179,7 @@ public class APIWrapper {
         }
     }
 
+    // Sends async HTTP request, but with authorization params, and refreshes tokens if needed
     private static boolean SendAuthorizedRequest(Context ctx, String method, String route, JSONObject requestData, AbstractAPIResponseHandler handler)
     {
         try
@@ -182,15 +191,20 @@ public class APIWrapper {
                     {
                         case HttpURLConnection.HTTP_OK:
                             String accessToken = GetAccessToken(ctx);
-                            if(accessToken == null)
+                            if(accessToken == null) // if token is not available, propagate an error message
                                 handler.Handle(null, HttpsURLConnection.HTTP_UNAUTHORIZED);
 
+                            //--- token was already valid, or a new token is generated successfully
                             Map<String, String> headers = new HashMap<>();
+
+                            //--- add authentication token to the request header
                             headers.put("Authorization", "Bearer " + accessToken);
 
+                            //--- send a regular async HTTP request
                             SendRequest(ctx, method, route, headers, requestData, handler);
                             break;
                         case HttpURLConnection.HTTP_UNAUTHORIZED:
+                            //--- token is not generated successfully
                             handler.Handle(null, statusCode);
                             break;
                         default:
@@ -206,9 +220,9 @@ public class APIWrapper {
         return true;
     }
 
+    // Saves authorization params
     public static void SaveAuthorizationParams(Context ctx, String access_token, String refresh_token, long expires_in)
     {
-        // save authorization params
         SharedPrefSingleton.getInstance(ctx).SetValue(
                 "string",
                 ctx.getString(R.string.API_ACCESS_TOKEN),
@@ -228,6 +242,7 @@ public class APIWrapper {
         );
     }
 
+    // Helpers for getting the authentication params
     public static String GetAccessToken(Context ctx)
     {
         return (String) SharedPrefSingleton.getInstance(ctx)
@@ -246,11 +261,13 @@ public class APIWrapper {
                 .GetValue("string", ctx.getString(R.string.API_REFRESH_TOKEN));
     }
 
+    // Checks whether access tokens is valid, and refreshes it if it's not
     private static void RefreshAccessTokenIfNeeded(Context ctx, AbstractAPIResponseHandler handler) throws JSONException {
         String accessToken = GetAccessToken(ctx);
         String refreshToken = GetRefreshToken(ctx);
         long expiresAt = GetExpiresAt(ctx);
 
+        //--- we can't refresh the access token if a previous value of access token or refresh token is missing
         if(accessToken == null || refreshToken == null || expiresAt == Long.MAX_VALUE)
         {
             handler.Handle(null, HttpsURLConnection.HTTP_UNAUTHORIZED);
@@ -260,6 +277,7 @@ public class APIWrapper {
 
         long now = CommonHelpers.GetCurrentTimestamp();
 
+        //--- if the current access token expired, send a renewal request
         if(now > expiresAt)
         {
             APIWrapper.RefreshAccessToken(ctx, refreshToken, new AbstractAPIResponseHandler() {
@@ -268,6 +286,7 @@ public class APIWrapper {
                     switch(statusCode)
                     {
                         case HttpURLConnection.HTTP_OK:
+                            //--- ok, everything went well, extract auth info and save it for later
                             String access_token = response.getString("access_token");
                             String refresh_token = response.getString("refresh_token");
                             long expires_in = response.getLong("expires_in");
@@ -277,6 +296,7 @@ public class APIWrapper {
                             handler.Handle(null, statusCode);
                             break;
                         default:
+                            //--- unfortunately, renewal failed
                             handler.Handle(null, HttpsURLConnection.HTTP_UNAUTHORIZED);
                             break;
                     }
@@ -285,11 +305,14 @@ public class APIWrapper {
         }
         else
         {
+            // use the current access token
             handler.Handle(null, HttpsURLConnection.HTTP_OK);
         }
     }
 
-    // api calls
+    /***
+     * Wrappers for API procedures
+     */
     public static boolean GetAccessToken(Context ctx, String email, String password, AbstractAPIResponseHandler handler) {
         Map<String, String> headers = new HashMap<>();
 

@@ -5,7 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 
-import rs.miki208.myrunningbuddy.helpers.APIWrapper;
+import rs.miki208.myrunningbuddy.networking.api.APIWrapper;
 
 public class MainActivity extends AppCompatActivity {
 

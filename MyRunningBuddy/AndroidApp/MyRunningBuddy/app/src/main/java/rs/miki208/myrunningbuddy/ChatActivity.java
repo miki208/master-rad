@@ -26,11 +26,11 @@ import org.json.JSONObject;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 
-import rs.miki208.myrunningbuddy.helpers.APIObjectCacheSingleton;
-import rs.miki208.myrunningbuddy.helpers.APIObjectLoader;
-import rs.miki208.myrunningbuddy.helpers.APIWrapper;
-import rs.miki208.myrunningbuddy.helpers.AbstractAPIResponseHandler;
-import rs.miki208.myrunningbuddy.helpers.ActivityHelper;
+import rs.miki208.myrunningbuddy.networking.api.APIObjectCacheSingleton;
+import rs.miki208.myrunningbuddy.networking.api.APIObjectLoader;
+import rs.miki208.myrunningbuddy.networking.api.APIWrapper;
+import rs.miki208.myrunningbuddy.networking.api.AbstractAPIResponseHandler;
+import rs.miki208.myrunningbuddy.common.ActivityHelper;
 
 public class ChatActivity extends AppCompatActivity {
 
