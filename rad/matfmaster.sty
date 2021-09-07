@@ -396,7 +396,7 @@
 % komanda koja kreira stranicu sa literaturom
 \newcommand{\literatura}{%                
 \ifmatfmaster@biblatex %                 % ako se koristi biblatex
-   \printbibliography%
+   \printbibliography[title={Литература}]%
 \else                                      % ako se koristi bibtex
    \bibliography{\matfmaster@bib}{}%
    \bibliographystyle{plain}%
